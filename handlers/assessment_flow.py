@@ -1,5 +1,4 @@
-# handlers/assessment_flow.py
-
+import asyncpg
 from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
@@ -12,12 +11,12 @@ from handlers.assessments.anxiety_test import start_anxiety_test, start_anxiety_
 router = Router()
 
 @router.message(F.text.endswith("Пройти начальную оценку"))
-async def start_initial_assessment_router(message: Message, state: FSMContext):
+async def start_initial_assessment_router(message: Message, state: FSMContext, pool: asyncpg.Pool):
     """
     Этот диспетчер определяет, какой курс у пользователя,
     и запускает соответствующий НАЧАЛЬНЫЙ тест.
     """
-    bookmark = await db.get_user_bookmark(message.from_user.id)
+    bookmark = await db.get_user_bookmark(pool, message.from_user.id)
     if not bookmark or not bookmark['current_course_id']:
         await message.answer("Пожалуйста, сначала выберите курс в главном меню.")
         return
@@ -31,12 +30,12 @@ async def start_initial_assessment_router(message: Message, state: FSMContext):
 
 
 @router.message(F.text.endswith("Оценить прогресс"))
-async def start_final_assessment_router(message: Message, state: FSMContext):
+async def start_final_assessment_router(message: Message, state: FSMContext, pool: asyncpg.Pool):
     """
     Этот диспетчер определяет, какой курс у пользователя,
     и запускает соответствующий ФИНАЛЬНЫЙ тест.
     """
-    bookmark = await db.get_user_bookmark(message.from_user.id)
+    bookmark = await db.get_user_bookmark(pool, message.from_user.id)
     if not bookmark or not bookmark['current_course_id']:
         await message.answer("Пожалуйста, сначала выберите курс в главном меню.")
         return

@@ -2,39 +2,23 @@ from aiogram.fsm.state import State, StatesGroup
 
 class Onboarding(StatesGroup):
     """
-    Класс состояний для онбординга пользователя.
+    Состояния для онбординга (знакомства) с пользователем.
     """
-    q1_thoughts = State()      # Состояние для первого вопроса (мысли)
-    q2_sleep = State()         # Состояние для второго вопроса (сон)
-    q3_tasks = State()         # Состояние для третьего вопроса (дела)
-    q4_emotions = State()      # Состояние для четвертого вопроса (эмоции)
-    final = State()            # Состояние для финального сообщения
-    
+    q1_thoughts = State()
+    q2_sleep = State()
+    q3_tasks = State()
+    q4_emotions = State()
+    final = State()
+
 class CourseSelection(StatesGroup):
     """
-    Состояние для выбора и подтверждения курса.
+    Состояния для выбора и подтверждения курса.
     """
     confirming_choice = State()
-    
-class Assessment(StatesGroup):
-    """
-    Состояния для прохождения тестов до и после курса.
-    """
-    initial_assessment = State()
-    final_assessment = State()
-    
-class ResetProgress(StatesGroup):
-    """
-    Состояние для подтверждения сброса прогресса.
-    """
-    confirming_reset = State()
-    
-# FSM/states.py
-# ...
 
-class Assessment(StatesGroup):
+class AnxietyTest(StatesGroup):
     """
-    Состояния для прохождения тестов до и после курса.
+    Состояния для прохождения теста на тревожность (начального и финального).
     """
     intro = State()
     q1 = State()
@@ -52,3 +36,9 @@ class Assessment(StatesGroup):
     q13 = State()
     q14 = State()
     q15 = State()
+
+class ResetProgress(StatesGroup):
+    """
+    Состояние для подтверждения сброса прогресса.
+    """
+    confirming_reset = State()

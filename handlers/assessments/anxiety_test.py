@@ -1,52 +1,17 @@
+import asyncpg
 from aiogram import Router, F
 from aiogram.types import Message, ReplyKeyboardRemove, KeyboardButton, ReplyKeyboardMarkup
-from aiogram.fsm.state import State, StatesGroup
+from aiogram.fsm.state import State
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import StateFilter
 
 import database as db
 from handlers.course_flow import show_main_menu
+from FSM.states import AnxietyTest
 
 # 1. Отдельный роутер для этого теста
 router = Router()
 
-# 2. Отдельная FSM-группа для этого теста
-class AnxietyTest(StatesGroup):
-    intro = State()
-    q1 = State()
-    q2 = State()
-    q3 = State()
-    q4 = State()
-    q5 = State()
-    q6 = State()
-    q7 = State()
-    q8 = State()
-    q9 = State()
-    q10 = State()
-    q11 = State()
-    q12 = State()
-    q13 = State()
-    q14 = State()
-    q15 = State()
-
-# 3. Новая FSM-группа для ФИНАЛЬНОГО теста
-class AnxietyFinalTest(StatesGroup):
-    intro = State()
-    q1 = State()
-    q2 = State()
-    q3 = State()
-    q4 = State()
-    q5 = State()
-    q6 = State()
-    q7 = State()
-    q8 = State()
-    q9 = State()
-    q10 = State()
-    q11 = State()
-    q12 = State()
-    q13 = State()
-    q14 = State()
-    q15 = State()
 
 # 3. Словарь для подсчета баллов
 # Ключ - текст ответа, значение - балл
@@ -79,8 +44,10 @@ q14_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=t)] for t in ["🟢 
 
 # 5. Точка входа, которую будет вызывать наш диспетчер
 async def start_anxiety_test(message: Message, state: FSMContext):
-    """Начинает тест на тревожность."""
+    """Начинает начальный тест на тревожность."""
     await state.set_state(AnxietyTest.intro)
+    # Сохраняем в FSM, какой тип теста мы проходим
+    await state.update_data(test_type='initial')
     await message.answer(
         "Этот короткий опрос поможет понять, какой у тебя сейчас уровень тревожности.\n"
         "Он займёт всего 3–4 минуты и даст отправную точку — чтобы после курса ты увидишь свой прогресс.\n\n"
@@ -98,7 +65,10 @@ async def start_anxiety_test(message: Message, state: FSMContext):
     
 async def start_anxiety_final_test(message: Message, state: FSMContext):
     """Начинает ФИНАЛЬНЫЙ тест на тревожность."""
-    await state.set_state(AnxietyFinalTest.intro)
+    # Используем тот же самый стейт
+    await state.set_state(AnxietyTest.intro)
+    # Но в FSM сохраняем другой тип теста
+    await state.update_data(test_type='final')
     await message.answer(
         "Поздравляем с завершением основной части курса! 🥳\n\n"
         "Теперь давай повторим тот же опрос, чтобы наглядно увидеть твой прогресс.\n\n"
@@ -106,23 +76,20 @@ async def start_anxiety_final_test(message: Message, state: FSMContext):
         "Готов(а) увидеть результат своей работы? 💙",
         reply_markup=ReplyKeyboardMarkup(keyboard=[
             [KeyboardButton(text="Вперед! 💙")],
-            [KeyboardButton(text="Пока не хочу")] # <-- Используем старые тексты
+            [KeyboardButton(text="Пока не хочу")]
         ], resize_keyboard=True)
     )
+
 # 6. Цепочка обработчиков для опросника
-@router.message(
-    StateFilter(AnxietyTest.intro, AnxietyFinalTest.intro), # <-- ИСПРАВЛЕНО ЗДЕСЬ
-    F.text == "Пока не хочу"
-)
-async def abort_assessment(message: Message, state: FSMContext):
+# Теперь фильтр работает только на один стейт
+@router.message(AnxietyTest.intro, F.text == "Пока не хочу")
+async def abort_assessment(message: Message, state: FSMContext, pool: asyncpg.Pool):
     await state.clear()
     await message.answer("Хорошо, можешь пройти тест в любое время.", reply_markup=ReplyKeyboardRemove())
-    await show_main_menu(message, message.from_user.id)
+    await show_main_menu(message, message.from_user.id, pool)
 
-@router.message(
-    StateFilter(AnxietyTest.intro, AnxietyFinalTest.intro), # <-- И ИСПРАВЛЕНО ЗДЕСЬ
-    F.text == "Вперед! 💙"
-)
+# Фильтр также работает только на один стейт
+@router.message(AnxietyTest.intro, F.text == "Вперед! 💙")
 async def q1_handler(message: Message, state: FSMContext):
     await state.set_state(AnxietyTest.q1)
     await state.update_data(score=0)
@@ -200,7 +167,7 @@ async def q15_handler(message: Message, state: FSMContext):
     )
 
 @router.message(AnxietyTest.q15, F.text.regexp(r'^\d+$'))
-async def assessment_final(message: Message, state: FSMContext):
+async def assessment_final(message: Message, state: FSMContext, pool: asyncpg.Pool):
     self_assessment = int(message.text)
     if not (0 <= self_assessment <= 10):
         await message.answer("Пожалуйста, введи число от 0 до 10.")
@@ -208,6 +175,8 @@ async def assessment_final(message: Message, state: FSMContext):
 
     data = await state.get_data()
     score = data.get('score', 0)
+    # Получаем тип теста, по умолчанию 'initial', если вдруг что-то пошло не так
+    test_type = data.get('test_type', 'initial')
 
     result_text = ""
     if 0 <= score <= 13:
@@ -217,13 +186,30 @@ async def assessment_final(message: Message, state: FSMContext):
     else:
         result_text = "🔴 **Высокий уровень тревожности.**\nТревога доставляет тебе значительный дискомфорт. Практики из этого курса дадут тебе рабочие инструменты для снижения её уровня. Помни, что при высокой тревожности также очень полезна консультация со специалистом."
 
-    bookmark = await db.get_user_bookmark(message.from_user.id)
-    await db.save_assessment_result(message.from_user.id, bookmark['current_course_id'], 'initial', score, self_assessment)
+    bookmark = await db.get_user_bookmark(pool, message.from_user.id)
+    # Используем test_type для сохранения правильного типа результата
+    await db.save_assessment_result(
+        pool=pool,
+        user_id=message.from_user.id,
+        course_id=bookmark['current_course_id'],
+        assessment_type=test_type,
+        score=score,
+        self_assessment=self_assessment
+    )
 
     await message.answer(f"Спасибо за честные ответы! Твой результат:\n\n{result_text}")
 
-    await db.update_user_bookmark(message.from_user.id, bookmark['current_course_id'], 1, 1)
+    # Завершаем FSM
     await state.clear()
 
-    await message.answer("Отлично! Мы определили отправную точку. А теперь давай начнём наш первый урок!")
-    await show_main_menu(message, message.from_user.id)
+    # В зависимости от типа теста, показываем разное сообщение
+    if test_type == 'initial':
+        # Для начального теста - сбрасываем прогресс на начало и зовем на первый урок
+        await db.update_user_bookmark(pool, message.from_user.id, bookmark['current_course_id'], 1, 1)
+        await message.answer("Отлично! Мы определили отправную точку. А теперь давай начнём наш первый урок!")
+    else: # final
+        # Для финального теста - просто поздравляем
+        await message.answer("Поздравляем с прохождением финальной оценки! Надеемся, курс был для тебя полезен. 💙")
+
+    # В любом случае показываем главное меню
+    await show_main_menu(message, message.from_user.id, pool)
