@@ -213,3 +213,18 @@ async def assessment_final(message: Message, state: FSMContext, pool: asyncpg.Po
 
     # В любом случае показываем главное меню
     await show_main_menu(message, message.from_user.id, pool)
+
+
+# --- Обработчик для некорректных ответов в тесте ---
+# Он должен быть последним, чтобы не перехватывать правильные ответы
+@router.message(
+    StateFilter(
+        AnxietyTest.q1, AnxietyTest.q2, AnxietyTest.q3, AnxietyTest.q4,
+        AnxietyTest.q5, AnxietyTest.q6, AnxietyTest.q7, AnxietyTest.q8,
+        AnxietyTest.q9, AnxietyTest.q10, AnxietyTest.q11, AnxietyTest.q12,
+        AnxietyTest.q13, AnxietyTest.q14
+    )
+)
+async def incorrect_test_answer(message: Message):
+    """Ловит любой текст, который не попал в хендлеры выше."""
+    await message.answer("Пожалуйста, выберите один из вариантов ответа, используя кнопки.")
