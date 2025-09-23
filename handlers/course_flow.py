@@ -3,6 +3,7 @@
 from aiogram import Router, F
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
+import importlib
 
 import database as db
 import keyboards.reply as kb
@@ -77,12 +78,38 @@ async def start_module(message: Message):
         )
         return
 
-    course_info = await db.get_course_by_id(bookmark['current_course_id'])
+    # Попытка динамического импорта модуля
+    day = bookmark['current_day']
+    module = bookmark['current_module']
+    module_name = f"handlers.modules.day_{day}_module_{module}"
+    
+    try:
+        # Динамически импортируем нужный модуль
+        module_handler = importlib.import_module(module_name)
+        
+        # Формируем имя функции для запуска модуля
+        function_name = f"start_day_{day}_module_{module}"
+        
+        if hasattr(module_handler, function_name):
+            # Запускаем модуль
+            await getattr(module_handler, function_name)(message)
+        else:
+            # Если функция не найдена, показываем заглушку
+            await show_module_placeholder(message, day, module)
+            
+    except ImportError:
+        # Если модуль не найден, показываем заглушку
+        await show_module_placeholder(message, day, module)
 
+async def show_module_placeholder(message: Message, day: int, module: int):
+    """Показывает заглушку для модуля, который еще не реализован."""
+    course_info = await db.get_course_by_id(1)  # Курс тревожности
+    
     await message.answer(
         f"📖 Курс «{course_info['emoji']} {course_info['title']}»\n"
-        f"**День {bookmark['current_day']}, Модуль {bookmark['current_module']}**\n\n"
-        f"Здесь будет текст вашего модуля...",
+        f"**День {day}, Модуль {module}**\n\n"
+        "Здесь будет текст вашего модуля...\n\n"
+        "🚧 Модуль находится в разработке. Скоро здесь появится интерактивное содержимое!",
         parse_mode="Markdown",
         reply_markup=kb.module_navigation_kb
     )

@@ -4,8 +4,9 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 
 from config import BOT_TOKEN
-from handlers import common, onboarding, menu, course_flow, assessment_flow, profile # <-- ДОБАВИТЬ
+from handlers import common, onboarding, menu, course_flow, assessment_flow, profile
 from handlers.assessments import anxiety_test
+from handlers.modules import day_1_module_1, day_1_module_2
 
 async def main():
     # Включаем логирование
@@ -22,12 +23,15 @@ async def main():
     dp.include_router(common.router)
     dp.include_router(onboarding.router)
     dp.include_router(menu.router)
-    dp.include_router(assessment_flow.router) # <-- ДОБАВИТЬ
+    dp.include_router(assessment_flow.router)
     dp.include_router(course_flow.router)
-    dp.include_router(profile.router) # <-- ДОБАВИТЬ В КОНЕЦ
+    dp.include_router(profile.router)
     
-    dp.include_router(anxiety_test.router) # <-- НОВАЯ СТРОКА
-    # <-- ДОБАВИТЬ
+    # Подключаем роутеры модулей
+    dp.include_router(day_1_module_1.router)
+    dp.include_router(day_1_module_2.router)
+    
+    dp.include_router(anxiety_test.router)
     
 
     # Пропускаем старые апдейты и запускаем polling
