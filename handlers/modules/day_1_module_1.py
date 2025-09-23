@@ -68,6 +68,13 @@ async def complete_day_1_module_1(message: Message, state: FSMContext):
         reply_markup=get_day_1_module_1_keyboard()
     )
 
+@router.message(Day1Module1States.completion, F.text == "✅ Понял, продолжаем")
+async def finish_day_1_module_1(message: Message, state: FSMContext):
+    """Завершает модуль и переходит к следующему."""
+    from handlers.course_flow import complete_module
+    await state.clear()  # Очищаем состояние модуля
+    await complete_module(message)  # Вызываем функцию завершения модуля
+
 @router.message(F.text == "🔄 Повторить")
 async def repeat_day_1_module_1(message: Message, state: FSMContext):
     """Повторяет текущий модуль."""
