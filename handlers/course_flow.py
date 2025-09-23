@@ -38,7 +38,7 @@ async def show_main_menu(message: Message, user_id: int):
             main_button_text = "Пройти начальную оценку"
         else:
             # 4. Если тест был, показываем текущий модуль из закладки
-            main_button_text = f"День {bookmark['current_day']}, Модуль {bookmark['current_module']}"
+            main_button_text = f"▶️ День {bookmark['current_day']}, Модуль {bookmark['current_module']}"
 
     # --- Конец упрощенной логики ---
 
@@ -54,7 +54,7 @@ async def show_main_menu(message: Message, user_id: int):
 # --- Основная логика прохождения ---
 
 # 1. Нажатие на главную кнопку "День X, Модуль Y" или другие варианты
-@router.message(F.text.regexp(r'^День \d+, Модуль \d+$'))
+@router.message(F.text.regexp(r'^▶️ День \d+, Модуль \d+$'))
 async def start_module(message: Message):
     user_id = message.from_user.id
     bookmark = await db.get_user_bookmark(user_id)
