@@ -134,72 +134,73 @@ async def q1_handler(message: Message, state: FSMContext):
     await message.answer("1. Как часто в последнее время ты ощущаешь волнение или беспокойство без причины? 😟", reply_markup=q1_kb)
 
 # Универсальная функция для обработки ответов с валидацией
-async def process_answer(message: Message, state: FSMContext, next_state: State, question_text: str, keyboard: ReplyKeyboardMarkup):
+async def process_answer(message: Message, state: FSMContext, next_state: State, question_text: str, next_keyboard: ReplyKeyboardMarkup, current_keyboard: ReplyKeyboardMarkup):
     # Проверяем, является ли ответ валидным
     if not is_valid_answer(message.text):
         await message.answer(
             "❌ Пожалуйста, выберите один из предложенных вариантов ответа, используя кнопки ниже.",
-            reply_markup=keyboard
+            reply_markup=current_keyboard
         )
         return
     
+    # Если ответ валидный, обрабатываем его
     data = await state.get_data()
     score = data.get('score', 0) + ANSWER_SCORES.get(message.text, 0)
     await state.update_data(score=score)
     await state.set_state(next_state)
-    await message.answer(question_text, reply_markup=keyboard)
+    await message.answer(question_text, reply_markup=next_keyboard)
 
 @router.message(AnxietyTest.q1)
 async def q2_handler(message: Message, state: FSMContext):
-    await process_answer(message, state, AnxietyTest.q2, "2. Как ты спишь? 😴", q2_kb)
+    await process_answer(message, state, AnxietyTest.q2, "2. Как ты спишь? 😴", q2_kb, q1_kb)
 
 @router.message(AnxietyTest.q2)
 async def q3_handler(message: Message, state: FSMContext):
-    await process_answer(message, state, AnxietyTest.q3, "3. Бывает ли у тебя напряжение в теле (плечи, шея, челюсти) без физической причины? 💆", q3_kb)
+    await process_answer(message, state, AnxietyTest.q3, "3. Бывает ли у тебя напряжение в теле (плечи, шея, челюсти) без физической причины? 💆", q3_kb, q2_kb)
 
 @router.message(AnxietyTest.q3)
 async def q4_handler(message: Message, state: FSMContext):
-    await process_answer(message, state, AnxietyTest.q4, "4. Как часто у тебя возникают тревожные мысли о будущем? 🔮", q4_kb)
+    await process_answer(message, state, AnxietyTest.q4, "4. Как часто у тебя возникают тревожные мысли о будущем? 🔮", q4_kb, q3_kb)
 
 @router.message(AnxietyTest.q4)
 async def q5_handler(message: Message, state: FSMContext):
-    await process_answer(message, state, AnxietyTest.q5, "5. Замечаешь ли ты учащённое сердцебиение, дрожь или потливость, когда тревожно? ❤️‍🔥", q5_kb)
+    await process_answer(message, state, AnxietyTest.q5, "5. Замечаешь ли ты учащённое сердцебиение, дрожь или потливость, когда тревожно? ❤️‍🔥", q5_kb, q4_kb)
 
 @router.message(AnxietyTest.q5)
 async def q6_handler(message: Message, state: FSMContext):
-    await process_answer(message, state, AnxietyTest.q6, "6. Как часто ты испытываешь раздражительность или вспышки гнева без серьёзной причины? 😠", q6_kb)
+    await process_answer(message, state, AnxietyTest.q6, "6. Как часто ты испытываешь раздражительность или вспышки гнева без серьёзной причины? 😠", q6_kb, q5_kb)
 
 @router.message(AnxietyTest.q6)
 async def q7_handler(message: Message, state: FSMContext):
-    await process_answer(message, state, AnxietyTest.q7, "7. Можешь ли ты спокойно сосредоточиться на задаче, когда вокруг стресс? 🎯", q7_kb)
+    await process_answer(message, state, AnxietyTest.q7, "7. Можешь ли ты спокойно сосредоточиться на задаче, когда вокруг стресс? 🎯", q7_kb, q6_kb)
 
 @router.message(AnxietyTest.q7)
 async def q8_handler(message: Message, state: FSMContext):
-    await process_answer(message, state, AnxietyTest.q8, "8. Как ты реагируешь на неожиданные трудности? 🚧", q8_kb)
+    await process_answer(message, state, AnxietyTest.q8, "8. Как ты реагируешь на неожиданные трудности? 🚧", q8_kb, q7_kb)
 
 @router.message(AnxietyTest.q8)
 async def q9_handler(message: Message, state: FSMContext):
-    await process_answer(message, state, AnxietyTest.q9, "9. Часто ли ты избегаешь ситуаций, которые могут вызвать стресс или волнение? 🛑", q9_kb)
+    await process_answer(message, state, AnxietyTest.q9, "9. Часто ли ты избегаешь ситуаций, которые могут вызвать стресс или волнение? 🛑", q9_kb, q8_kb)
 
 @router.message(AnxietyTest.q9)
 async def q10_handler(message: Message, state: FSMContext):
-    await process_answer(message, state, AnxietyTest.q10, "10. Чувствуешь ли ты, что тревога мешает тебе отдыхать и наслаждаться жизнью? 🌴", q10_kb)
+    await process_answer(message, state, AnxietyTest.q10, "10. Чувствуешь ли ты, что тревога мешает тебе отдыхать и наслаждаться жизнью? 🌴", q10_kb, q9_kb)
 
 @router.message(AnxietyTest.q10)
 async def q11_handler(message: Message, state: FSMContext):
-    await process_answer(message, state, AnxietyTest.q11, "11. Замечаешь ли ты, что тревога влияет на твоё здоровье (головные боли, желудок, усталость)? 💊", q11_kb)
+    await process_answer(message, state, AnxietyTest.q11, "11. Замечаешь ли ты, что тревога влияет на твоё здоровье (головные боли, желудок, усталость)? 💊", q11_kb, q10_kb)
 
 @router.message(AnxietyTest.q11)
 async def q12_handler(message: Message, state: FSMContext):
-    await process_answer(message, state, AnxietyTest.q12, "12. Насколько ты уверен(а) в своих силах справляться с трудностями? 💪", q12_kb)
+    await process_answer(message, state, AnxietyTest.q12, "12. Насколько ты уверен(а) в своих силах справляться с трудностями? 💪", q12_kb, q11_kb)
 
 @router.message(AnxietyTest.q12)
 async def q13_handler(message: Message, state: FSMContext):
-    await process_answer(message, state, AnxietyTest.q13, "13. Как часто у тебя бывают трудности с дыханием или ощущение, что “не хватает воздуха” при тревоге? 🌬", q13_kb)
+    await process_answer(message, state, AnxietyTest.q13, "13. Как часто у тебя бывают трудности с дыханием или ощущение, что “не хватает воздуха” при тревоге? 🌬", q13_kb, q13_kb)
 
 @router.message(AnxietyTest.q13)
 async def q14_handler(message: Message, state: FSMContext):
-    await process_answer(message, state, AnxietyTest.q14, "14. Как часто тебе нужна поддержка других, чтобы успокоиться? 🤝", q14_kb)
+    await process_answer(message, state, AnxietyTest.q14, "14. Как часто тебе нужна поддержка других, чтобы успокоиться? 🤝", q14_kb, q13_kb)
 
 @router.message(AnxietyTest.q14)
 async def q15_handler(message: Message, state: FSMContext):
