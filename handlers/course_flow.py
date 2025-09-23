@@ -15,20 +15,27 @@ router = Router()
 # --- Вспомогательная функция для показа главного меню (УПРОЩЕННАЯ) ---
 async def show_main_menu(message: Message, user_id: int):
     """Отправляет пользователю его актуальное главное меню для курса тревожности."""
-    bookmark = await db.get_user_bookmark(user_id)
-    
-    # Если у пользователя нет активного курса, устанавливаем курс тревожности (ID = 1)
-    if not bookmark or not bookmark['current_course_id']:
-        await db.update_user_bookmark(user_id, 1, 1, 1)
+    try:
         bookmark = await db.get_user_bookmark(user_id)
-    
-    # Дополнительная проверка после обновления закладки
-    if not bookmark:
-        await message.answer("Произошла ошибка при загрузке меню. Попробуйте позже.")
-        return
-    
-    course_id = bookmark['current_course_id']
-    course_info = await db.get_course_by_id(course_id)
+        
+        # Если у пользователя нет активного курса, устанавливаем курс тревожности (ID = 1)
+        if not bookmark or not bookmark['current_course_id']:
+            await db.update_user_bookmark(user_id, 1, 1, 1)
+            bookmark = await db.get_user_bookmark(user_id)
+        
+        # Дополнительная проверка после обновления закладки
+        if not bookmark:
+            # Попробуем создать пользователя заново
+            await db.add_user(user_id, "Unknown", None)
+            await db.update_user_bookmark(user_id, 1, 1, 1)
+            bookmark = await db.get_user_bookmark(user_id)
+            
+            if not bookmark:
+                await message.answer("Произошла ошибка при загрузке меню. Попробуйте позже.")
+                return
+        
+        course_id = bookmark['current_course_id']
+        course_info = await db.get_course_by_id(course_id)
     
     # --- УПРОЩЕННАЯ ЛОГИКА ДЛЯ КУРСА ТРЕВОЖНОСТИ ---
     
@@ -56,6 +63,10 @@ async def show_main_menu(message: Message, user_id: int):
         resize_keyboard=True
     )
     await message.answer("Ваше главное меню:", reply_markup=main_menu_kb)
+    
+    except Exception as e:
+        print(f"Ошибка в show_main_menu: {e}")
+        await message.answer("Произошла ошибка при загрузке меню. Попробуйте позже.")
 
 # --- Основная логика прохождения ---
 

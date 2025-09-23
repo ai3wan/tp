@@ -46,8 +46,14 @@ async def get_user_bookmark(telegram_id: int):
 async def update_user_bookmark(user_id: int, course_id: int, day: int, module: int):
     """Универсально обновляет закладку пользователя."""
     conn = await asyncpg.connect(DATABASE_URL)
-    sql = "UPDATE users SET current_course_id = $1, current_day = $2, current_module = $3 WHERE telegram_id = $4"
     try:
+        # Сначала проверяем, существует ли пользователь
+        user_exists = await conn.fetchval("SELECT id FROM users WHERE telegram_id = $1", user_id)
+        if not user_exists:
+            # Если пользователя нет, создаем его
+            await add_user(user_id, "Unknown", None)
+        
+        sql = "UPDATE users SET current_course_id = $1, current_day = $2, current_module = $3 WHERE telegram_id = $4"
         await conn.execute(sql, course_id, day, module, user_id)
     finally:
         await conn.close()
