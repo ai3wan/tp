@@ -56,7 +56,7 @@ async def show_main_menu(message: Message, user_id: int):
 
 # 1. Нажатие на главную кнопку "День X, Модуль Y" или другие варианты
 @router.message(F.text.regexp(r'^▶️ День \d+, Модуль \d+$'))
-async def start_module(message: Message):
+async def start_module(message: Message, state: FSMContext):
     user_id = message.from_user.id
     bookmark = await db.get_user_bookmark(user_id)
     
@@ -92,7 +92,7 @@ async def start_module(message: Message):
         
         if hasattr(module_handler, function_name):
             # Запускаем модуль
-            await getattr(module_handler, function_name)(message)
+            await getattr(module_handler, function_name)(message, state)
         else:
             # Если функция не найдена, показываем заглушку
             await show_module_placeholder(message, day, module)
@@ -141,8 +141,8 @@ async def back_to_main_from_blocked_modules_course(message: Message):
 
 # 2. Нажатие на "Давай повторим"
 @router.message(F.text == "🔄 Давай повторим")
-async def repeat_module(message: Message):
-    await start_module(message)
+async def repeat_module(message: Message, state: FSMContext):
+    await start_module(message, state)
 
 # 3. Нажатие на "Все ясно"
 @router.message(F.text == "✅ Все ясно")
@@ -180,10 +180,10 @@ async def complete_module(message: Message):
 
 # 4. Нажатие на "Двигаемся дальше"
 @router.message(F.text == "▶️ Двигаемся дальше")
-async def advance_to_next(message: Message):
+async def advance_to_next(message: Message, state: FSMContext):
     # Теперь эта кнопка просто запускает следующий модуль,
     # так как закладка уже передвинута.
-    await start_module(message)
+    await start_module(message, state)
 
 # 5. Нажатие на "В основное меню"
 @router.message(F.text == "🏠 В основное меню")
