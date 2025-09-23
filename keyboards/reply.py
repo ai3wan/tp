@@ -76,7 +76,8 @@ def get_main_menu_kb(course_title: str, emoji: str) -> ReplyKeyboardMarkup:
 module_navigation_kb = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="✅ Все ясно")],
-        [KeyboardButton(text="🔄 Давай повторим")]
+        [KeyboardButton(text="🔄 Давай повторим")],
+        [KeyboardButton(text="🏠 В основное меню")]
     ],
     resize_keyboard=True
 )
