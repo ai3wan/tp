@@ -58,10 +58,10 @@ async def select_module_entry(message: Message):
     user_id = message.from_user.id
     bookmark = await db.get_user_bookmark(user_id)
     
-    # Устанавливаем курс тревожности, если его нет
+    # Проверяем, что закладка существует
     if not bookmark or not bookmark['current_course_id']:
-        await db.update_user_bookmark(user_id, 1, 1, 1)
-        bookmark = await db.get_user_bookmark(user_id)
+        await message.answer("Ошибка: пользователь не найден. Попробуйте перезапустить бота командой /start")
+        return
     
     # ПРОВЕРКА: если пользователь не прошел начальный тест, блокируем доступ к модулям
     # Проверяем тест для курса тревожности (ID = 1), независимо от текущей закладки
