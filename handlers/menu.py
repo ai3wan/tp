@@ -63,9 +63,36 @@ async def select_module_entry(message: Message):
         await db.update_user_bookmark(user_id, 1, 1, 1)
         bookmark = await db.get_user_bookmark(user_id)
     
+    # ПРОВЕРКА: если пользователь не прошел начальный тест, блокируем доступ к модулям
+    initial_assessment = await db.get_initial_assessment_result(user_id, bookmark['current_course_id'])
+    if not initial_assessment:
+        await message.answer(
+            "🔒 Для доступа к модулям курса необходимо сначала пройти начальную оценку.\n\n"
+            "Это поможет нам лучше подстроить курс под ваши потребности и отследить ваш прогресс.\n\n"
+            "Готовы пройти тест?",
+            reply_markup=ReplyKeyboardMarkup(keyboard=[
+                [KeyboardButton(text="✅ Да, пройти тест")],
+                [KeyboardButton(text="🏠 В главное меню")]
+            ], resize_keyboard=True)
+        )
+        return
+    
     progress = await db.get_all_completed_modules_for_course(user_id, bookmark['current_course_id'])
     days_kb = ikb.get_days_keyboard(bookmark['current_day'], progress)
     await message.answer("Выберите день для просмотра модулей:", reply_markup=days_kb)
+
+# Обработчики для кнопок блокировки модулей
+@router.message(F.text == "✅ Да, пройти тест")
+async def start_test_from_blocked_modules(message: Message, state: FSMContext):
+    """Пользователь согласился пройти тест после попытки доступа к модулям."""
+    from handlers.assessments.anxiety_test import start_anxiety_test
+    await start_anxiety_test(message, state)
+
+@router.message(F.text == "🏠 В главное меню")
+async def back_to_main_from_blocked_modules(message: Message):
+    """Возврат в главное меню из блокировки модулей."""
+    await message.answer("Возвращаю в главное меню.", reply_markup=ReplyKeyboardRemove())
+    await show_main_menu(message, message.from_user.id)
 
 # ... (остальные обработчики без изменений) ...
 @router.callback_query(F.data.startswith("select_day_"))

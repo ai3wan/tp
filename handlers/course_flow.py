@@ -63,6 +63,20 @@ async def start_module(message: Message):
         await show_main_menu(message, user_id)
         return
 
+    # ПРОВЕРКА: если пользователь не прошел начальный тест, блокируем доступ к модулям
+    initial_assessment = await db.get_initial_assessment_result(user_id, bookmark['current_course_id'])
+    if not initial_assessment:
+        await message.answer(
+            "🔒 Для доступа к модулям курса необходимо сначала пройти начальную оценку.\n\n"
+            "Это поможет нам лучше подстроить курс под ваши потребности и отследить ваш прогресс.\n\n"
+            "Готовы пройти тест?",
+            reply_markup=kb.ReplyKeyboardMarkup(keyboard=[
+                [kb.KeyboardButton(text="✅ Да, пройти тест")],
+                [kb.KeyboardButton(text="🏠 В главное меню")]
+            ], resize_keyboard=True)
+        )
+        return
+
     course_info = await db.get_course_by_id(bookmark['current_course_id'])
 
     await message.answer(
@@ -84,6 +98,19 @@ async def start_initial_assessment(message: Message, state: FSMContext):
 async def start_final_assessment(message: Message, state: FSMContext):
     from handlers.assessments.anxiety_test import start_anxiety_final_test
     await start_anxiety_final_test(message, state)
+
+# Обработчики для кнопок блокировки модулей (дублируем из menu.py для удобства)
+@router.message(F.text == "✅ Да, пройти тест")
+async def start_test_from_blocked_modules_course(message: Message, state: FSMContext):
+    """Пользователь согласился пройти тест после попытки доступа к модулям."""
+    from handlers.assessments.anxiety_test import start_anxiety_test
+    await start_anxiety_test(message, state)
+
+@router.message(F.text == "🏠 В главное меню")
+async def back_to_main_from_blocked_modules_course(message: Message):
+    """Возврат в главное меню из блокировки модулей."""
+    await message.answer("Возвращаю в главное меню.", reply_markup=ReplyKeyboardRemove())
+    await show_main_menu(message, message.from_user.id)
 
 # 2. Нажатие на "Давай повторим"
 @router.message(F.text == "🔄 Давай повторим")
