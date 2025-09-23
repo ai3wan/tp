@@ -127,6 +127,9 @@ async def module_selected(callback: CallbackQuery, state: FSMContext):
     await callback.message.delete()
     await callback.answer(f"Перехожу к модулю {day}.{module}...")
     
+    # Получаем обновленную закладку
+    updated_bookmark = await db.get_user_bookmark(user_id)
+    
     # Запускаем выбранный модуль
     from handlers.course_flow import start_module
     await start_module(callback.message, state)

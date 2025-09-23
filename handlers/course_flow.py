@@ -60,6 +60,11 @@ async def start_module(message: Message, state: FSMContext):
     user_id = message.from_user.id
     bookmark = await db.get_user_bookmark(user_id)
     
+    # Проверяем, что закладка существует
+    if not bookmark or not bookmark['current_day']:
+        await show_main_menu(message, user_id)
+        return
+    
     if bookmark['current_day'] > 14:
         await show_main_menu(message, user_id)
         return
