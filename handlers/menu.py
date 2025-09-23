@@ -134,12 +134,25 @@ async def module_selected(callback: CallbackQuery, state: FSMContext):
     await callback.message.delete()
     await callback.answer(f"Перехожу к модулю {day}.{module}...")
     
-    # Получаем обновленную закладку
-    updated_bookmark = await db.get_user_bookmark(user_id)
+    # Запускаем выбранный модуль напрямую
+    module_name = f"handlers.modules.day_{day}_module_{module}"
     
-    # Запускаем выбранный модуль
-    from handlers.course_flow import start_module
-    await start_module(callback.message, state)
+    try:
+        import importlib
+        module_handler = importlib.import_module(module_name)
+        function_name = f"start_day_{day}_module_{module}"
+        
+        if hasattr(module_handler, function_name):
+            await getattr(module_handler, function_name)(callback.message, state)
+        else:
+            # Если модуль не найден, показываем заглушку
+            from handlers.course_flow import show_module_placeholder
+            await show_module_placeholder(callback.message, day, module)
+            
+    except ImportError:
+        # Если модуль не найден, показываем заглушку
+        from handlers.course_flow import show_module_placeholder
+        await show_module_placeholder(callback.message, day, module)
 
 @router.callback_query(F.data.in_({"day_locked", "module_locked"}))
 async def locked_button_pressed(callback: CallbackQuery):
