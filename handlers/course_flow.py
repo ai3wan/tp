@@ -22,6 +22,11 @@ async def show_main_menu(message: Message, user_id: int):
         await db.update_user_bookmark(user_id, 1, 1, 1)
         bookmark = await db.get_user_bookmark(user_id)
     
+    # Дополнительная проверка после обновления закладки
+    if not bookmark:
+        await message.answer("Произошла ошибка при загрузке меню. Попробуйте позже.")
+        return
+    
     course_id = bookmark['current_course_id']
     course_info = await db.get_course_by_id(course_id)
     

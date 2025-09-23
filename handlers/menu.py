@@ -119,6 +119,12 @@ async def module_selected(callback: CallbackQuery, state: FSMContext):
     user_id = callback.from_user.id
     
     bookmark = await db.get_user_bookmark(user_id)
+    
+    # Проверяем, что закладка существует
+    if not bookmark:
+        await callback.answer("Ошибка: закладка не найдена. Попробуйте позже.", show_alert=True)
+        return
+    
     course_id = bookmark['current_course_id']
     
     # Обновляем закладку пользователя
