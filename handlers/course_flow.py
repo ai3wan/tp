@@ -36,34 +36,34 @@ async def show_main_menu(message: Message, user_id: int):
         
         course_id = bookmark['current_course_id']
         course_info = await db.get_course_by_id(course_id)
-    
-    # --- УПРОЩЕННАЯ ЛОГИКА ДЛЯ КУРСА ТРЕВОЖНОСТИ ---
-    
-    # 1. Проверяем, пройден ли курс полностью (42 модуля)
-    progress = await db.get_all_completed_modules_for_course(user_id, course_id)
-    if len(progress) >= 42:
-        main_button_text = "Оценить прогресс"
-    else:
-        # 2. Если курс не пройден, проверяем, был ли начальный тест
-        initial_assessment = await db.get_initial_assessment_result(user_id, course_id)
-        if not initial_assessment:
-            # 3. Если теста не было, предлагаем его пройти
-            main_button_text = "Пройти начальную оценку"
+        
+        # --- УПРОЩЕННАЯ ЛОГИКА ДЛЯ КУРСА ТРЕВОЖНОСТИ ---
+        
+        # 1. Проверяем, пройден ли курс полностью (42 модуля)
+        progress = await db.get_all_completed_modules_for_course(user_id, course_id)
+        if len(progress) >= 42:
+            main_button_text = "Оценить прогресс"
         else:
-            # 4. Если тест был, показываем текущий модуль из закладки
-            main_button_text = f"▶️ День {bookmark['current_day']}, Модуль {bookmark['current_module']}"
+            # 2. Если курс не пройден, проверяем, был ли начальный тест
+            initial_assessment = await db.get_initial_assessment_result(user_id, course_id)
+            if not initial_assessment:
+                # 3. Если теста не было, предлагаем его пройти
+                main_button_text = "Пройти начальную оценку"
+            else:
+                # 4. Если тест был, показываем текущий модуль из закладки
+                main_button_text = f"▶️ День {bookmark['current_day']}, Модуль {bookmark['current_module']}"
 
-    # --- Конец упрощенной логики ---
+        # --- Конец упрощенной логики ---
 
-    main_menu_kb = kb.ReplyKeyboardMarkup(
-        keyboard=[
-            [kb.KeyboardButton(text=main_button_text), kb.KeyboardButton(text="📚 Выбрать модуль")],
-            [kb.KeyboardButton(text="🙏 Практики"), kb.KeyboardButton(text="🙍 Профиль")]
-        ],
-        resize_keyboard=True
-    )
-    await message.answer("Ваше главное меню:", reply_markup=main_menu_kb)
-    
+        main_menu_kb = kb.ReplyKeyboardMarkup(
+            keyboard=[
+                [kb.KeyboardButton(text=main_button_text), kb.KeyboardButton(text="📚 Выбрать модуль")],
+                [kb.KeyboardButton(text="🙏 Практики"), kb.KeyboardButton(text="🙍 Профиль")]
+            ],
+            resize_keyboard=True
+        )
+        await message.answer("Ваше главное меню:", reply_markup=main_menu_kb)
+        
     except Exception as e:
         print(f"Ошибка в show_main_menu: {e}")
         await message.answer("Произошла ошибка при загрузке меню. Попробуйте позже.")
