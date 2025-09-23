@@ -10,26 +10,22 @@ import keyboards.inline as ikb # <-- ДОБАВЬТЕ ЭТУ СТРОКУ
 router = Router()
 
 
-# --- Вспомогательная функция для показа главного меню (ОСНОВНЫЕ ИЗМЕНЕНИЯ) ---
+# --- Вспомогательная функция для показа главного меню (УПРОЩЕННАЯ) ---
 async def show_main_menu(message: Message, user_id: int):
-    """Отправляет пользователю его актуальное главное меню с умной кнопкой."""
+    """Отправляет пользователю его актуальное главное меню для курса тревожности."""
     bookmark = await db.get_user_bookmark(user_id)
     
+    # Если у пользователя нет активного курса, устанавливаем курс тревожности (ID = 1)
     if not bookmark or not bookmark['current_course_id']:
-        courses = await db.get_all_courses()
-        await message.answer(
-            "У вас нет активного курса. Давайте выберем один!",
-            reply_markup=ikb.get_courses_kb(courses)
-        )
-        await message.answer("Выберите курс из списка выше:", reply_markup=ReplyKeyboardRemove())
-        return
-
+        await db.update_user_bookmark(user_id, 1, 1, 1)
+        bookmark = await db.get_user_bookmark(user_id)
+    
     course_id = bookmark['current_course_id']
     course_info = await db.get_course_by_id(course_id)
     
-    # --- НОВАЯ УМНАЯ ЛОГИКА ---
+    # --- УПРОЩЕННАЯ ЛОГИКА ДЛЯ КУРСА ТРЕВОЖНОСТИ ---
     
-    # 1. Сначала проверяем, пройден ли курс полностью
+    # 1. Проверяем, пройден ли курс полностью (42 модуля)
     progress = await db.get_all_completed_modules_for_course(user_id, course_id)
     if len(progress) >= 42:
         main_button_text = f"Курс «{course_info['emoji']} {course_info['title']}». Оценить прогресс"
@@ -43,12 +39,12 @@ async def show_main_menu(message: Message, user_id: int):
             # 4. Если тест был, показываем текущий модуль из закладки
             main_button_text = f"Курс «{course_info['emoji']} {course_info['title']}». День {bookmark['current_day']}. Модуль {bookmark['current_module']}"
 
-    # --- Конец новой логики ---
+    # --- Конец упрощенной логики ---
 
     main_menu_kb = kb.ReplyKeyboardMarkup(
         keyboard=[
             [kb.KeyboardButton(text=main_button_text)],
-            [kb.KeyboardButton(text="Выбрать курс"), kb.KeyboardButton(text="Выбрать модуль")],
+            [kb.KeyboardButton(text="Выбрать модуль")],
             [kb.KeyboardButton(text="Практики"), kb.KeyboardButton(text="Профиль")]
         ],
         resize_keyboard=True

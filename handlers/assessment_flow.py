@@ -14,38 +14,26 @@ router = Router()
 @router.message(F.text.endswith("Пройти начальную оценку"))
 async def start_initial_assessment_router(message: Message, state: FSMContext):
     """
-    Этот диспетчер определяет, какой курс у пользователя,
-    и запускает соответствующий НАЧАЛЬНЫЙ тест.
+    Запускает начальный тест тревожности.
     """
     bookmark = await db.get_user_bookmark(message.from_user.id)
     if not bookmark or not bookmark['current_course_id']:
-        await message.answer("Пожалуйста, сначала выберите курс в главном меню.")
-        return
+        # Устанавливаем курс тревожности (ID = 1) если его нет
+        await db.update_user_bookmark(message.from_user.id, 1, 1, 1)
         
-    course_id = bookmark['current_course_id']
-
-    if course_id == 1:
-        await start_anxiety_test(message, state)
-    else:
-        await message.answer("Для этого курса пока нет входного тестирования.")
+    # Запускаем тест тревожности
+    await start_anxiety_test(message, state)
 
 
 @router.message(F.text.endswith("Оценить прогресс"))
 async def start_final_assessment_router(message: Message, state: FSMContext):
     """
-    Этот диспетчер определяет, какой курс у пользователя,
-    и запускает соответствующий ФИНАЛЬНЫЙ тест.
+    Запускает финальный тест тревожности.
     """
     bookmark = await db.get_user_bookmark(message.from_user.id)
     if not bookmark or not bookmark['current_course_id']:
-        await message.answer("Пожалуйста, сначала выберите курс в главном меню.")
+        await message.answer("Пожалуйста, сначала завершите курс.")
         return
 
-    course_id = bookmark['current_course_id']
-
-    if course_id == 1:
-        # Вызываем новую функцию для запуска финального теста
-        await start_anxiety_final_test(message, state)
-    else:
-        # Заглушка для других курсов
-        await message.answer("Для этого курса пока нет финального тестирования.")
+    # Запускаем финальный тест тревожности
+    await start_anxiety_final_test(message, state)

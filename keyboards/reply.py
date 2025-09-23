@@ -47,8 +47,8 @@ onboarding_q4_kb = ReplyKeyboardMarkup(
 
 onboarding_final_kb = ReplyKeyboardMarkup(
     keyboard=[
-        [KeyboardButton(text="🙌 Да, хочу выбрать курс")],
-        [KeyboardButton(text="🤔 Хочу посмотреть, что есть")]
+        [KeyboardButton(text="✅ Да, давай пройдем тест")],
+        [KeyboardButton(text="🤔 Сначала расскажи про курс")]
     ],
     resize_keyboard=True
 )

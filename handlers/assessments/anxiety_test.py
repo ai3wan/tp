@@ -218,11 +218,13 @@ async def assessment_final(message: Message, state: FSMContext):
         result_text = "🔴 **Высокий уровень тревожности.**\nТревога доставляет тебе значительный дискомфорт. Практики из этого курса дадут тебе рабочие инструменты для снижения её уровня. Помни, что при высокой тревожности также очень полезна консультация со специалистом."
 
     bookmark = await db.get_user_bookmark(message.from_user.id)
-    await db.save_assessment_result(message.from_user.id, bookmark['current_course_id'], 'initial', score, self_assessment)
+    # Используем курс тревожности (ID = 1) по умолчанию
+    course_id = bookmark['current_course_id'] if bookmark and bookmark['current_course_id'] else 1
+    await db.save_assessment_result(message.from_user.id, course_id, 'initial', score, self_assessment)
 
     await message.answer(f"Спасибо за честные ответы! Твой результат:\n\n{result_text}")
 
-    await db.update_user_bookmark(message.from_user.id, bookmark['current_course_id'], 1, 1)
+    await db.update_user_bookmark(message.from_user.id, course_id, 1, 1)
     await state.clear()
 
     await message.answer("Отлично! Мы определили отправную точку. А теперь давай начнём наш первый урок!")

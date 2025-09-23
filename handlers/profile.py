@@ -78,71 +78,57 @@ async def show_profile(message: Message):
 
 @router.message(F.text == "📖 Завершенные курсы")
 async def show_completed_courses(message: Message):
+    """Показывает информацию о завершенном курсе тревожности."""
     all_progress = await db.get_all_courses_progress(message.from_user.id)
     completed_courses = [c for c in all_progress if c['modules_completed'] >= 42]
 
     if not completed_courses:
-        await message.answer("У вас пока нет завершённых курсов.")
+        await message.answer("У вас пока нет завершённых курсов. Продолжайте заниматься!")
         return
 
+    # Поскольку у нас только курс тревожности, показываем его результат
+    course = completed_courses[0]  # Берем первый (и единственный) завершенный курс
     await message.answer(
-        "Вот ваши завершенные курсы. Выберите, чтобы посмотреть итоги:",
-        reply_markup=ikb.get_courses_kb(completed_courses) # Используем существующий kb
+        f"🎉 Поздравляем! Вы завершили курс «{course['emoji']} {course['title']}»!\n\n"
+        f"Пройдено модулей: {course['modules_completed']}/42\n\n"
+        "Это отличное достижение! Вы освоили множество техник для работы с тревожностью."
     )
-
-# Заглушка для просмотра итогов
-@router.callback_query(F.data.startswith("select_course_"))
-async def view_completed_result(callback: CallbackQuery):
-    # Эта заглушка сработает и здесь. В будущем можно будет разделить логику.
-    course_id = int(callback.data.split("_")[2])
-    course = await db.get_course_by_id(course_id)
-    await callback.message.answer(f"Итоги по курсу «{course['title']}» будут здесь.")
-    await callback.answer()
 
 # --- Логика сброса прогресса ---
 
 @router.message(F.text == "🗑️ Сбросить прогресс")
 async def reset_progress_start(message: Message):
+    """Предлагает сбросить прогресс по курсу тревожности."""
     all_progress = await db.get_all_courses_progress(message.from_user.id)
     courses_with_progress = [c for c in all_progress if c['modules_completed'] > 0]
 
     if not courses_with_progress:
-        await message.answer("У вас нет курсов, по которым можно сбросить прогресс.")
+        await message.answer("У вас нет прогресса по курсу, который можно сбросить.")
         return
 
+    # Поскольку у нас только курс тревожности, сразу предлагаем сброс
+    course = courses_with_progress[0]
     await message.answer(
-        "Прогресс по какому курсу вы хотите сбросить? Внимание: это действие необратимо.",
-        reply_markup=ikb.get_reset_courses_kb(courses_with_progress)
-    )
-
-@router.callback_query(F.data.startswith("reset_course_"))
-async def reset_progress_confirm(callback: CallbackQuery, state: FSMContext):
-    course_id = int(callback.data.split("_")[2])
-    course = await db.get_course_by_id(course_id)
-    
-    await state.set_state(ResetProgress.confirming_reset)
-    await state.update_data(course_to_reset=course_id)
-    
-    await callback.message.edit_text(
-        f"Вы уверены, что хотите сбросить прогресс по курсу «{course['title']}»? Все ваши достижения по нему будут удалены.",
+        f"Вы хотите сбросить весь прогресс по курсу «{course['emoji']} {course['title']}»?\n\n"
+        f"Текущий прогресс: {course['modules_completed']}/42 модулей\n\n"
+        "⚠️ Внимание: это действие необратимо. Все ваши достижения будут удалены.",
         reply_markup=ikb.get_confirm_reset_kb()
     )
 
-@router.callback_query(ResetProgress.confirming_reset, F.data == "confirm_reset")
+@router.callback_query(F.data == "confirm_reset")
 async def reset_progress_execute(callback: CallbackQuery, state: FSMContext):
-    data = await state.get_data()
-    course_id = data.get('course_to_reset')
-    
-    await db.reset_progress_for_course(callback.from_user.id, course_id)
+    """Выполняет сброс прогресса по курсу тревожности."""
+    # Устанавливаем курс тревожности (ID = 1) для сброса
+    await db.reset_progress_for_course(callback.from_user.id, 1)
     
     await state.clear()
-    await callback.message.edit_text("✅ Прогресс по курсу успешно сброшен.")
-    #await show_profile(callback.message)
+    await callback.message.edit_text("✅ Прогресс по курсу успешно сброшен. Вы можете начать заново!")
 
-@router.callback_query(ResetProgress.confirming_reset, F.data == "cancel_reset")
+@router.callback_query(F.data == "cancel_reset")
 async def reset_progress_cancel(callback: CallbackQuery, state: FSMContext):
+    """Отменяет сброс прогресса."""
     await state.clear()
-    await callback.message.edit_text("Сброс отменён.")
+    await callback.message.edit_text("Сброс отменён. Ваш прогресс сохранён.")
 
 # --- Вернуться в меню ---
 @router.message(F.text == "↩️ Вернуться в меню")
