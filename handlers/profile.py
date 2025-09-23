@@ -18,38 +18,53 @@ def create_progress_bar(completed: int, total: int) -> str:
     progress_percent = int((completed / total) * 10)
     return "🟩" * progress_percent + "⬜️" * (10 - progress_percent)
 
-# --- Вспомогательная функция для получения результатов входного тестирования ---
-async def get_initial_assessment_display(user_id: int, course_id: int) -> str:
-    """Возвращает строку с результатами входного тестирования и цветным индикатором."""
+# --- Вспомогательная функция для получения результатов всех тестов ---
+async def get_all_assessments_display(user_id: int, course_id: int) -> list:
+    """Возвращает список строк с результатами всех тестов."""
     import asyncpg
     conn = await asyncpg.connect(db.DATABASE_URL)
     try:
         db_user_id = await conn.fetchval("SELECT id FROM users WHERE telegram_id = $1", user_id)
         if not db_user_id:
-            return "🔘 Тест не пройден"
+            return ["🔘 Тесты не пройдены"]
             
         sql = """
-            SELECT score, self_assessment_score FROM assessment_results
-            WHERE user_id = $1 AND course_id = $2 AND assessment_type = 'initial'
-            LIMIT 1;
+            SELECT assessment_type, score, self_assessment_score FROM assessment_results
+            WHERE user_id = $1 AND course_id = $2
+            ORDER BY assessment_type;
         """
-        result = await conn.fetchrow(sql, db_user_id, course_id)
+        results = await conn.fetch(sql, db_user_id, course_id)
         
-        if not result:
-            return "🔘 Тест не пройден"
-            
-        score = result['score']
-        self_assessment = result['self_assessment_score']
+        if not results:
+            return ["🔘 Тесты не пройдены"]
         
-        # Определяем цвет индикатора по уровню тревожности
-        if 0 <= score <= 13:
-            indicator = "🟢"  # Низкий уровень
-        elif 14 <= score <= 26:
-            indicator = "🟡"  # Средний уровень
-        else:
-            indicator = "🔴"  # Высокий уровень
+        assessments = []
+        for result in results:
+            assessment_type = result['assessment_type']
+            score = result['score']
+            self_assessment = result['self_assessment_score']
             
-        return f"{indicator} Входной тест: {score}/42 баллов (самооценка: {self_assessment}/10)"
+            # Определяем цвет индикатора по уровню тревожности
+            if 0 <= score <= 13:
+                indicator = "🟢"  # Низкий уровень
+            elif 14 <= score <= 26:
+                indicator = "🟡"  # Средний уровень
+            else:
+                indicator = "🔴"  # Высокий уровень
+            
+            # Определяем название теста
+            if assessment_type == 'initial':
+                test_name = "Входной тест"
+            elif assessment_type == 'intermediate':
+                test_name = "Промежуточный тест"
+            elif assessment_type == 'final':
+                test_name = "Финальный тест"
+            else:
+                test_name = f"Тест ({assessment_type})"
+            
+            assessments.append(f"{indicator} {test_name}: {score}/42 баллов (самооценка: {self_assessment}/10)")
+        
+        return assessments
         
     finally:
         await conn.close()
@@ -64,8 +79,8 @@ async def show_profile(message: Message):
     start_date = await db.get_user_start_date(user_id)
     all_courses_progress = await db.get_all_courses_progress(user_id)
     
-    # 2. Получаем результаты входного тестирования
-    assessment_display = await get_initial_assessment_display(user_id, 1)  # Курс тревожности (ID = 1)
+    # 2. Получаем результаты всех тестов
+    assessments_display = await get_all_assessments_display(user_id, 1)  # Курс тревожности (ID = 1)
     
     # 3. Считаем статистику и готовим списки
     total_modules_count = 0
@@ -81,7 +96,6 @@ async def show_profile(message: Message):
         elif course['modules_completed'] > 0:
             progress_bar = create_progress_bar(course['modules_completed'], 42)
             active_courses_text.append(
-                f"Курс: «{course['emoji']} {course['title']}»\n"
                 f"Прогресс: {course['modules_completed']}/42 модулей\n[{progress_bar}]"
             )
             
@@ -91,13 +105,19 @@ async def show_profile(message: Message):
         f"Вы с нами с: {start_date}\n",
         "---",
         "📊 Ваша статистика:",
-        f"• Всего завершено модулей: {total_modules_count}",
-        f"• {assessment_display}\n",
+        f"• Всего завершено модулей: {total_modules_count}\n",
         "---"
     ]
 
+    # Добавляем результаты тестов
+    if assessments_display:
+        profile_text.append("🧪 Результаты тестирования:")
+        for assessment in assessments_display:
+            profile_text.append(f"• {assessment}")
+        profile_text.append("\n---")
+
+    # Добавляем прогресс курса
     if active_courses_text:
-        profile_text.append("🎯 Ваши активные курсы:\n")
         profile_text.extend(active_courses_text)
         profile_text.append("\n---")
 

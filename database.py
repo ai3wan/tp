@@ -247,3 +247,29 @@ async def get_initial_assessment_result(user_id: int, course_id: int):
         return result
     finally:
         await conn.close()
+
+async def get_all_assessment_results(user_id: int, course_id: int):
+    """Получает все результаты тестирования для пользователя и курса."""
+    conn = await asyncpg.connect(DATABASE_URL)
+    db_user_id = await conn.fetchval("SELECT id FROM users WHERE telegram_id = $1", user_id)
+    if not db_user_id:
+        await conn.close()
+        return {}
+        
+    sql = """
+        SELECT assessment_type, score, self_assessment_score
+        FROM assessment_results
+        WHERE user_id = $1 AND course_id = $2
+        ORDER BY assessment_type;
+    """
+    try:
+        rows = await conn.fetch(sql, db_user_id, course_id)
+        results = {}
+        for row in rows:
+            results[row['assessment_type']] = {
+                'score': row['score'],
+                'self_assessment': row['self_assessment_score']
+            }
+        return results
+    finally:
+        await conn.close()
