@@ -85,7 +85,8 @@ async def start_module(message: Message, state: FSMContext):
         return
 
     # ПРОВЕРКА: если пользователь не прошел начальный тест, блокируем доступ к модулям
-    initial_assessment = await db.get_initial_assessment_result(user_id, bookmark['current_course_id'])
+    # Проверяем тест для курса тревожности (ID = 1), независимо от выбранного модуля
+    initial_assessment = await db.get_initial_assessment_result(user_id, 1)  # Всегда проверяем курс тревожности
     if not initial_assessment:
         await message.answer(
             "🔒 Для доступа к модулям курса необходимо сначала пройти начальную оценку.\n\n"

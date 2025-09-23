@@ -64,7 +64,8 @@ async def select_module_entry(message: Message):
         bookmark = await db.get_user_bookmark(user_id)
     
     # ПРОВЕРКА: если пользователь не прошел начальный тест, блокируем доступ к модулям
-    initial_assessment = await db.get_initial_assessment_result(user_id, bookmark['current_course_id'])
+    # Проверяем тест для курса тревожности (ID = 1), независимо от текущей закладки
+    initial_assessment = await db.get_initial_assessment_result(user_id, 1)  # Всегда проверяем курс тревожности
     if not initial_assessment:
         await message.answer(
             "🔒 Для доступа к модулям курса необходимо сначала пройти начальную оценку.\n\n"
