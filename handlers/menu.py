@@ -113,7 +113,7 @@ async def day_selected(callback: CallbackQuery):
     await callback.answer()
     
 @router.callback_query(F.data.startswith("select_module_"))
-async def module_selected(callback: CallbackQuery):
+async def module_selected(callback: CallbackQuery, state: FSMContext):
     parts = callback.data.split("_")
     day, module = int(parts[2]), int(parts[3])
     user_id = callback.from_user.id
@@ -121,19 +121,15 @@ async def module_selected(callback: CallbackQuery):
     bookmark = await db.get_user_bookmark(user_id)
     course_id = bookmark['current_course_id']
     
+    # Обновляем закладку пользователя
     await db.update_user_bookmark(user_id, course_id, day, module)
 
     await callback.message.delete()
     await callback.answer(f"Перехожу к модулю {day}.{module}...")
     
-    course_info = await db.get_course_by_id(course_id)
-    await callback.message.answer(
-        f"📖 Курс «{course_info['emoji']} {course_info['title']}»\n"
-        f"**День {day}, Модуль {module}**\n\n"
-        f"Здесь будет текст вашего модуля...",
-        parse_mode="Markdown",
-        reply_markup=rkb.module_navigation_kb
-    )
+    # Запускаем выбранный модуль
+    from handlers.course_flow import start_module
+    await start_module(callback.message, state)
 
 @router.callback_query(F.data.in_({"day_locked", "module_locked"}))
 async def locked_button_pressed(callback: CallbackQuery):
