@@ -119,37 +119,11 @@ async def show_profile(message: Message):
     # Добавляем прогресс курса
     if active_courses_text:
         profile_text.extend(active_courses_text)
-        profile_text.append("\n---")
-
-    if completed_courses_list:
-        profile_text.append("🏆 Ваши ачивки (завершённые курсы):")
-        for course in completed_courses_list:
-            profile_text.append(f"✅ {course['title']}")
-    else:
-        profile_text.append("🏆 У вас пока нет завершённых курсов.")
 
     await message.answer("\n".join(profile_text), reply_markup=rkb.profile_kb)
 
 
 # --- Обработчики кнопок меню профиля ---
-
-@router.message(F.text == "📖 Завершенные курсы")
-async def show_completed_courses(message: Message):
-    """Показывает информацию о завершенном курсе тревожности."""
-    all_progress = await db.get_all_courses_progress(message.from_user.id)
-    completed_courses = [c for c in all_progress if c['modules_completed'] >= 42]
-
-    if not completed_courses:
-        await message.answer("У вас пока нет завершённых курсов. Продолжайте заниматься!")
-        return
-
-    # Поскольку у нас только курс тревожности, показываем его результат
-    course = completed_courses[0]  # Берем первый (и единственный) завершенный курс
-    await message.answer(
-        f"🎉 Поздравляем! Вы завершили курс «{course['emoji']} {course['title']}»!\n\n"
-        f"Пройдено модулей: {course['modules_completed']}/42\n\n"
-        "Это отличное достижение! Вы освоили множество техник для работы с тревожностью."
-    )
 
 # --- Логика сброса прогресса ---
 

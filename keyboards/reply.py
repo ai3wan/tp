@@ -114,7 +114,6 @@ final_assessment_kb = ReplyKeyboardMarkup(
 # --- Профиль ---
 profile_kb = ReplyKeyboardMarkup(
     keyboard=[
-        [KeyboardButton(text="📖 Завершенные курсы")],
         [KeyboardButton(text="🗑️ Сбросить прогресс")],
         [KeyboardButton(text="↩️ Вернуться в меню")]
     ],
