@@ -18,6 +18,42 @@ def create_progress_bar(completed: int, total: int) -> str:
     progress_percent = int((completed / total) * 10)
     return "🟩" * progress_percent + "⬜️" * (10 - progress_percent)
 
+# --- Вспомогательная функция для получения результатов входного тестирования ---
+async def get_initial_assessment_display(user_id: int, course_id: int) -> str:
+    """Возвращает строку с результатами входного тестирования и цветным индикатором."""
+    import asyncpg
+    conn = await asyncpg.connect(db.DATABASE_URL)
+    try:
+        db_user_id = await conn.fetchval("SELECT id FROM users WHERE telegram_id = $1", user_id)
+        if not db_user_id:
+            return "🔘 Тест не пройден"
+            
+        sql = """
+            SELECT score, self_assessment_score FROM assessment_results
+            WHERE user_id = $1 AND course_id = $2 AND assessment_type = 'initial'
+            LIMIT 1;
+        """
+        result = await conn.fetchrow(sql, db_user_id, course_id)
+        
+        if not result:
+            return "🔘 Тест не пройден"
+            
+        score = result['score']
+        self_assessment = result['self_assessment_score']
+        
+        # Определяем цвет индикатора по уровню тревожности
+        if 0 <= score <= 13:
+            indicator = "🟢"  # Низкий уровень
+        elif 14 <= score <= 26:
+            indicator = "🟡"  # Средний уровень
+        else:
+            indicator = "🔴"  # Высокий уровень
+            
+        return f"{indicator} Входной тест: {score}/42 баллов (самооценка: {self_assessment}/10)"
+        
+    finally:
+        await conn.close()
+
 
 # --- Основной обработчик кнопки "Профиль" ---
 @router.message(F.text == "Профиль")
@@ -28,8 +64,10 @@ async def show_profile(message: Message):
     start_date = await db.get_user_start_date(user_id)
     all_courses_progress = await db.get_all_courses_progress(user_id)
     
-    # 2. Считаем статистику и готовим списки
-    completed_courses_count = 0
+    # 2. Получаем результаты входного тестирования
+    assessment_display = await get_initial_assessment_display(user_id, 1)  # Курс тревожности (ID = 1)
+    
+    # 3. Считаем статистику и готовим списки
     total_modules_count = 0
     active_courses_text = []
     completed_courses_list = []
@@ -38,7 +76,6 @@ async def show_profile(message: Message):
         total_modules_count += course['modules_completed']
         # Курс завершен, если пройдено 42 модуля (14 дней * 3 модуля)
         if course['modules_completed'] >= 42:
-            completed_courses_count += 1
             completed_courses_list.append(course)
         # Если есть прогресс, но курс не завершен - он активный
         elif course['modules_completed'] > 0:
@@ -48,14 +85,14 @@ async def show_profile(message: Message):
                 f"Прогресс: {course['modules_completed']}/42 модулей\n[{progress_bar}]"
             )
             
-    # 3. Формируем итоговое сообщение
+    # 4. Формируем итоговое сообщение
     profile_text = [
         f"👤 Ваш Профиль\n",
         f"Вы с нами с: {start_date}\n",
         "---",
-        "📊 Ваша общая статистика:",
-        f"• Пройдено курсов: {completed_courses_count}",
-        f"• Всего завершено модулей: {total_modules_count}\n",
+        "📊 Ваша статистика:",
+        f"• Всего завершено модулей: {total_modules_count}",
+        f"• {assessment_display}\n",
         "---"
     ]
 
