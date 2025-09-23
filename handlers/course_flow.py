@@ -25,8 +25,7 @@ async def show_main_menu(message: Message, user_id: int):
         
         # Дополнительная проверка после обновления закладки
         if not bookmark:
-            # Попробуем создать пользователя заново
-            await db.add_user(user_id, "Unknown", None)
+            # Попробуем установить закладку напрямую
             await db.update_user_bookmark(user_id, 1, 1, 1)
             bookmark = await db.get_user_bookmark(user_id)
             
