@@ -56,7 +56,7 @@ async def get_initial_assessment_display(user_id: int, course_id: int) -> str:
 
 
 # --- Основной обработчик кнопки "Профиль" ---
-@router.message(F.text == "Профиль")
+@router.message(F.text == "🙍 Профиль")
 async def show_profile(message: Message):
     user_id = message.from_user.id
     

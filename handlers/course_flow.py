@@ -44,8 +44,8 @@ async def show_main_menu(message: Message, user_id: int):
 
     main_menu_kb = kb.ReplyKeyboardMarkup(
         keyboard=[
-            [kb.KeyboardButton(text=main_button_text), kb.KeyboardButton(text="Выбрать модуль")],
-            [kb.KeyboardButton(text="Практики"), kb.KeyboardButton(text="Профиль")]
+            [kb.KeyboardButton(text=main_button_text), kb.KeyboardButton(text="📚 Выбрать модуль")],
+            [kb.KeyboardButton(text="🙏 Практики"), kb.KeyboardButton(text="🙍 Профиль")]
         ],
         resize_keyboard=True
     )

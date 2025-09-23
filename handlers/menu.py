@@ -52,7 +52,7 @@ async def start_course_without_test(message: Message):
     await show_main_menu(message, message.from_user.id)
 
 # --- Старые обработчики меню (упрощенные) ---
-@router.message(F.text == "Выбрать модуль")
+@router.message(F.text == "📚 Выбрать модуль")
 async def select_module_entry(message: Message):
     """Показывает календарь дней для выбора модуля курса тревожности."""
     user_id = message.from_user.id
@@ -93,6 +93,11 @@ async def back_to_main_from_blocked_modules(message: Message):
     """Возврат в главное меню из блокировки модулей."""
     await message.answer("Возвращаю в главное меню.", reply_markup=ReplyKeyboardRemove())
     await show_main_menu(message, message.from_user.id)
+
+@router.message(F.text == "🙏 Практики")
+async def show_practices(message: Message):
+    """Показывает раздел дополнительных практик."""
+    await message.answer("Этот раздел находится в разработке 🚧")
 
 # ... (остальные обработчики без изменений) ...
 @router.callback_query(F.data.startswith("select_day_"))
