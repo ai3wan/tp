@@ -18,14 +18,9 @@ async def show_main_menu(message: Message, user_id: int):
     try:
         bookmark = await db.get_user_bookmark(user_id)
         
-        # Если у пользователя нет активного курса, устанавливаем курс тревожности (ID = 1)
+        # Если у пользователя нет активного курса, сообщаем об ошибке
         if not bookmark or not bookmark['current_course_id']:
-            await db.update_user_bookmark(user_id, 1, 1, 1)
-            bookmark = await db.get_user_bookmark(user_id)
-        
-        # Дополнительная проверка после обновления закладки
-        if not bookmark:
-            await message.answer("Произошла ошибка при загрузке меню. Попробуйте позже.")
+            await message.answer("Ошибка: пользователь не найден. Попробуйте перезапустить бота командой /start")
             return
         
         course_id = bookmark['current_course_id']
@@ -72,11 +67,11 @@ async def start_module(message: Message, state: FSMContext):
     
     # Проверяем, что закладка существует
     if not bookmark or not bookmark['current_day']:
-        await show_main_menu(message, user_id)
+        await message.answer("Ошибка: пользователь не найден. Попробуйте перезапустить бота командой /start")
         return
     
     if bookmark['current_day'] > 14:
-        await show_main_menu(message, user_id)
+        await message.answer("Курс завершен! Поздравляем!")
         return
 
     # ПРОВЕРКА: если пользователь не прошел начальный тест, блокируем доступ к модулям
