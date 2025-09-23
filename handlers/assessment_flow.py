@@ -11,7 +11,7 @@ from handlers.assessments.anxiety_test import start_anxiety_test, start_anxiety_
 
 router = Router()
 
-@router.message(F.text.endswith("Пройти начальную оценку"))
+@router.message(F.text == "Пройти начальную оценку")
 async def start_initial_assessment_router(message: Message, state: FSMContext):
     """
     Запускает начальный тест тревожности.
@@ -25,7 +25,7 @@ async def start_initial_assessment_router(message: Message, state: FSMContext):
     await start_anxiety_test(message, state)
 
 
-@router.message(F.text.endswith("Оценить прогресс"))
+@router.message(F.text == "Оценить прогресс")
 async def start_final_assessment_router(message: Message, state: FSMContext):
     """
     Запускает финальный тест тревожности.

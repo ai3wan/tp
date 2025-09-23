@@ -2,6 +2,7 @@
 
 from aiogram import Router, F
 from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.fsm.context import FSMContext
 
 import database as db
 import keyboards.reply as kb
@@ -28,23 +29,22 @@ async def show_main_menu(message: Message, user_id: int):
     # 1. Проверяем, пройден ли курс полностью (42 модуля)
     progress = await db.get_all_completed_modules_for_course(user_id, course_id)
     if len(progress) >= 42:
-        main_button_text = f"Курс «{course_info['emoji']} {course_info['title']}». Оценить прогресс"
+        main_button_text = "Оценить прогресс"
     else:
         # 2. Если курс не пройден, проверяем, был ли начальный тест
         initial_assessment = await db.get_initial_assessment_result(user_id, course_id)
         if not initial_assessment:
             # 3. Если теста не было, предлагаем его пройти
-            main_button_text = f"Курс «{course_info['emoji']} {course_info['title']}». Пройти начальную оценку"
+            main_button_text = "Пройти начальную оценку"
         else:
             # 4. Если тест был, показываем текущий модуль из закладки
-            main_button_text = f"Курс «{course_info['emoji']} {course_info['title']}». День {bookmark['current_day']}. Модуль {bookmark['current_module']}"
+            main_button_text = f"День {bookmark['current_day']}, Модуль {bookmark['current_module']}"
 
     # --- Конец упрощенной логики ---
 
     main_menu_kb = kb.ReplyKeyboardMarkup(
         keyboard=[
-            [kb.KeyboardButton(text=main_button_text)],
-            [kb.KeyboardButton(text="Выбрать модуль")],
+            [kb.KeyboardButton(text=main_button_text), kb.KeyboardButton(text="Выбрать модуль")],
             [kb.KeyboardButton(text="Практики"), kb.KeyboardButton(text="Профиль")]
         ],
         resize_keyboard=True
@@ -53,8 +53,8 @@ async def show_main_menu(message: Message, user_id: int):
 
 # --- Основная логика прохождения ---
 
-# 1. Нажатие на главную кнопку "Начать/Продолжить курс"
-@router.message(F.text.startswith(("Начать «", "Курс «")))
+# 1. Нажатие на главную кнопку "День X, Модуль Y" или другие варианты
+@router.message(F.text.regexp(r'^День \d+, Модуль \d+$'))
 async def start_module(message: Message):
     user_id = message.from_user.id
     bookmark = await db.get_user_bookmark(user_id)
@@ -72,6 +72,18 @@ async def start_module(message: Message):
         parse_mode="Markdown",
         reply_markup=kb.module_navigation_kb
     )
+
+# Обработчик для кнопки "Пройти начальную оценку"
+@router.message(F.text == "Пройти начальную оценку")
+async def start_initial_assessment(message: Message, state: FSMContext):
+    from handlers.assessments.anxiety_test import start_anxiety_test
+    await start_anxiety_test(message, state)
+
+# Обработчик для кнопки "Оценить прогресс"
+@router.message(F.text == "Оценить прогресс")
+async def start_final_assessment(message: Message, state: FSMContext):
+    from handlers.assessments.anxiety_test import start_anxiety_final_test
+    await start_anxiety_final_test(message, state)
 
 # 2. Нажатие на "Давай повторим"
 @router.message(F.text == "🔄 Давай повторим")
