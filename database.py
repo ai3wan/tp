@@ -218,6 +218,38 @@ async def get_all_completed_modules_for_course(user_id: int, course_id: int):
     finally:
         await conn.close()
         
+async def reset_assessment_results(user_id: int, course_id: int):
+    """Удаляет все результаты оценок для пользователя и курса."""
+    conn = await asyncpg.connect(DATABASE_URL)
+    db_user_id = await conn.fetchval("SELECT id FROM users WHERE telegram_id = $1", user_id)
+    if not db_user_id:
+        await conn.close()
+        return
+    
+    try:
+        await conn.execute(
+            "DELETE FROM assessment_results WHERE user_id = $1 AND course_id = $2",
+            db_user_id, course_id
+        )
+    finally:
+        await conn.close()
+
+async def reset_user_bookmark(user_id: int):
+    """Сбрасывает закладку пользователя к началу курса."""
+    conn = await asyncpg.connect(DATABASE_URL)
+    db_user_id = await conn.fetchval("SELECT id FROM users WHERE telegram_id = $1", user_id)
+    if not db_user_id:
+        await conn.close()
+        return
+    
+    try:
+        await conn.execute(
+            "UPDATE user_bookmarks SET current_day = 1, current_module = 1 WHERE user_id = $1",
+            db_user_id
+        )
+    finally:
+        await conn.close()
+
 async def save_assessment_result(user_id: int, course_id: int, assessment_type: str, score: int, self_assessment: int):
     """Сохраняет результаты пульса тревожности в базу данных."""
     conn = await asyncpg.connect(DATABASE_URL)

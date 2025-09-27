@@ -1,7 +1,7 @@
 # handlers/course_flow.py
 
 from aiogram import Router, F
-from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types import Message, ReplyKeyboardRemove, CallbackQuery
 from aiogram.fsm.context import FSMContext
 import importlib
 
@@ -31,7 +31,12 @@ async def show_main_menu(message: Message, user_id: int):
         # 1. Проверяем, пройден ли курс полностью (42 модуля)
         progress = await db.get_all_completed_modules_for_course(user_id, course_id)
         if len(progress) >= 42:
-            main_button_text = "Оценить прогресс"
+            # Проверяем, есть ли финальный тест
+            all_results = await db.get_all_assessment_results(user_id, course_id)
+            if all_results.get('final'):
+                main_button_text = "Курс завершен"
+            else:
+                main_button_text = "Оценить прогресс"
         else:
             # 2. Если курс не пройден, проверяем, был ли начальный пульс тревожности
             initial_assessment = await db.get_initial_assessment_result(user_id, course_id)
@@ -136,6 +141,50 @@ async def start_initial_assessment(message: Message, state: FSMContext):
     from handlers.assessments.anxiety_test import start_anxiety_test
     await start_anxiety_test(message, state)
 
+# Обработчик для кнопки "Курс завершен"
+@router.message(F.text == "Курс завершен")
+async def show_course_completion(message: Message):
+    user_id = message.from_user.id
+    bookmark = await db.get_user_bookmark(user_id)
+    course_id = bookmark['current_course_id'] if bookmark and bookmark['current_course_id'] else 1
+    
+    # Получаем результаты тестов
+    all_results = await db.get_all_assessment_results(user_id, course_id)
+    initial_score = all_results.get('initial', {}).get('score', 0)
+    final_score = all_results.get('final', {}).get('score', 0)
+    difference = final_score - initial_score
+    
+    # Определяем сообщение на основе разницы
+    if difference <= -10:
+        result_message = "✨ Отличный результат! Тревожность снизилась заметно. Продолжай использовать практики — они уже приносят плоды."
+    elif -9 <= difference <= -4:
+        result_message = "💫 Есть положительный сдвиг. Регулярная практика поможет закрепить результат и усилить эффект."
+    elif -3 <= difference <= 3:
+        result_message = "🌿 Значимых изменений пока нет. Продолжение практик или повторное прохождение курса может помочь."
+    elif 4 <= difference <= 9:
+        result_message = "⚖️ Уровень тревожности немного вырос. Попробуй вернуться к практикам или пройти курс заново, чтобы поддержать баланс."
+    else:  # difference >= 10
+        result_message = "❤️ Видно, что тревожность усилилась. Попробуй ещё раз использовать практики, а если тревога мешает повседневной жизни — стоит обратиться к специалисту."
+    
+    # Создаем инлайн клавиатуру для сброса прогресса
+    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+    reset_kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Сбросить прогресс", callback_data="reset_progress")]
+    ])
+    
+    await message.answer(
+        f"🎉 Поздравляем!\n"
+        f"14-дневный курс по снижению тревожности завершён. Это серьёзный шаг — и твоя личная заслуга 🙌\n\n"
+        f"За это время удалось регулярно выполнять упражнения, знакомиться с новыми практиками и глубже понять себя. Теперь у тебя есть набор знаний и техник, которые можно использовать в любой момент. 🌿\n\n"
+        f"Спасибо за настойчивость и внимание к себе! Пусть спокойствие становится привычным состоянием, а тревога приходит всё реже 💫\n\n"
+        f"📊 **Результаты сравнения**\n\n"
+        f"Пульс тревожности до курса: {initial_score}/42 баллов\n"
+        f"Пульс тревожности после курса: {final_score}/42 баллов\n"
+        f"Разница: {difference:+d} баллов\n\n"
+        f"{result_message}",
+        reply_markup=reset_kb
+    )
+
 # Обработчик для кнопки "Оценить прогресс"
 @router.message(F.text == "Оценить прогресс")
 async def start_final_assessment(message: Message, state: FSMContext):
@@ -218,3 +267,51 @@ async def back_to_main_menu(message: Message):
     """Возврат в главное меню из модуля."""
     await message.answer("Возвращаю вас в главное меню.", reply_markup=ReplyKeyboardRemove())
     await show_main_menu(message, message.from_user.id)
+
+# Обработчики для инлайн кнопок
+@router.callback_query(F.data == "reset_progress")
+async def handle_reset_progress_callback(callback: CallbackQuery):
+    """Обработчик для кнопки 'Сбросить прогресс'."""
+    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+    
+    # Создаем клавиатуру подтверждения
+    confirm_kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Да", callback_data="confirm_reset")],
+        [InlineKeyboardButton(text="НЕТ", callback_data="cancel_reset")]
+    ])
+    
+    await callback.message.edit_text(
+        "Вы точно хотите сбросить прогресс?\n"
+        "(все данные будут удалены)",
+        reply_markup=confirm_kb
+    )
+    await callback.answer()
+
+@router.callback_query(F.data == "confirm_reset")
+async def handle_confirm_reset(callback: CallbackQuery):
+    """Обработчик для подтверждения сброса прогресса."""
+    user_id = callback.from_user.id
+    bookmark = await db.get_user_bookmark(user_id)
+    course_id = bookmark['current_course_id'] if bookmark and bookmark['current_course_id'] else 1
+    
+    # Сбрасываем прогресс и оценки
+    await db.reset_progress_for_course(user_id, course_id)
+    await db.reset_assessment_results(user_id, course_id)
+    
+    # Сбрасываем закладку пользователя
+    await db.reset_user_bookmark(user_id)
+    
+    await callback.message.edit_text(
+        "✅ Прогресс сброшен!\n\n"
+        "Теперь вы можете начать курс заново."
+    )
+    
+    # Показываем главное меню
+    await show_main_menu(callback.message, user_id)
+    await callback.answer()
+
+@router.callback_query(F.data == "cancel_reset")
+async def handle_cancel_reset(callback: CallbackQuery):
+    """Обработчик для отмены сброса прогресса."""
+    await callback.message.edit_text("Отмена сброса прогресса.")
+    await callback.answer()
