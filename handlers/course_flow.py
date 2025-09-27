@@ -304,13 +304,16 @@ async def handle_confirm_reset(callback: CallbackQuery):
     # Сбрасываем закладку пользователя
     await db.reset_user_bookmark(user_id)
     
+    # Изменяем сообщение "📂 Все сохранённые данные исчезнут" на "✅ Прогресс сброшен!"
+    await callback.message.edit_text("✅ Прогресс сброшен!")
+    
     # Создаем инлайн кнопку для запуска курса
     from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
     start_course_kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📘 Начать курс", callback_data="start_course")]
     ])
     
-    await callback.message.edit_text(
+    await callback.message.answer(
         "📘 Для запуска курса нажмите ▶️ /start",
         reply_markup=start_course_kb
     )
@@ -319,7 +322,8 @@ async def handle_confirm_reset(callback: CallbackQuery):
 @router.callback_query(F.data == "cancel_reset")
 async def handle_cancel_reset(callback: CallbackQuery):
     """Обработчик для отмены сброса прогресса."""
-    await callback.message.edit_text("Отмена сброса прогресса.")
+    # Изменяем сообщение "📂 Все сохранённые данные исчезнут" на "❌ Сброс отменен"
+    await callback.message.edit_text("❌ Сброс отменен")
     # Возвращаемся в главное меню
     await show_main_menu(callback.message, callback.from_user.id)
     await callback.answer()
