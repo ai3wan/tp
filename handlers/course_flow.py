@@ -139,8 +139,8 @@ async def start_initial_assessment(message: Message, state: FSMContext):
 # Обработчик для кнопки "Оценить прогресс"
 @router.message(F.text == "Оценить прогресс")
 async def start_final_assessment(message: Message, state: FSMContext):
-    from handlers.assessments.anxiety_test import start_anxiety_final_test
-    await start_anxiety_final_test(message, state)
+    from handlers.assessments.final_test import start_final_test
+    await start_final_test(message, state)
 
 # Обработчики для кнопок блокировки модулей (дублируем из menu.py для удобства)
 @router.message(F.text == "✅ Да, пройти пульс тревожности")

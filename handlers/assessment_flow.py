@@ -6,8 +6,9 @@ from aiogram.fsm.context import FSMContext
 
 import database as db
 
-# Импортируем обе "точки входа" из нашего файла с пульсом тревожности
-from handlers.assessments.anxiety_test import start_anxiety_test, start_anxiety_final_test
+# Импортируем точки входа из наших файлов с тестами
+from handlers.assessments.anxiety_test import start_anxiety_test
+from handlers.assessments.final_test import start_final_test
 
 router = Router()
 
@@ -36,4 +37,4 @@ async def start_final_assessment_router(message: Message, state: FSMContext):
         return
 
     # Запускаем финальный пульс тревожности
-    await start_anxiety_final_test(message, state)
+    await start_final_test(message, state)

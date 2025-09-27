@@ -5,7 +5,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 
 from config import BOT_TOKEN
 from handlers import common, onboarding, menu, course_flow, assessment_flow, profile
-from handlers.assessments import anxiety_test
+from handlers.assessments import anxiety_test, final_test
 from handlers.modules import day_1_module_1, day_1_module_2
 
 async def main():
@@ -32,6 +32,7 @@ async def main():
     dp.include_router(day_1_module_2.router)
     
     dp.include_router(anxiety_test.router)
+    dp.include_router(final_test.router)
     
 
     # Пропускаем старые апдейты и запускаем polling
