@@ -31,10 +31,10 @@ async def start_handler(message: Message, state: FSMContext):
         await state.set_state(Onboarding.q1_thoughts)
         # Отправляем гифку с текстом
         import os
-        from aiogram.types import InputFile
+        from aiogram.types import FSInputFile
         
         gif_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "welcome_tp.gif")
-        gif_file = InputFile(gif_path)
+        gif_file = FSInputFile(gif_path)
         
         await message.answer_animation(
             animation=gif_file,
