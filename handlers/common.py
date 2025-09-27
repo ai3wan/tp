@@ -15,7 +15,8 @@ router = Router()
 
 @router.message(Command("start"))
 async def start_handler(message: Message, state: FSMContext):
-    await db.add_user(
+    # Добавляем пользователя (если его нет) и получаем его ID
+    user_db_id = await db.add_user(
         telegram_id=message.from_user.id,
         first_name=message.from_user.first_name,
         username=message.from_user.username
