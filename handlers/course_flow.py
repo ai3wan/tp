@@ -287,7 +287,7 @@ async def handle_reset_progress_callback(callback: CallbackQuery):
     )
     
     # Убираем главную клавиатуру
-    await callback.message.answer("", reply_markup=ReplyKeyboardRemove())
+    await callback.message.answer(" ", reply_markup=ReplyKeyboardRemove())
     await callback.answer()
 
 @router.callback_query(F.data == "confirm_reset")
