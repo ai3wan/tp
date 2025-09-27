@@ -312,3 +312,37 @@ async def get_all_assessment_results(user_id: int, course_id: int):
         return results
     finally:
         await conn.close()
+
+async def get_last_completed_module(user_id: int, course_id: int):
+    """Возвращает информацию о последнем завершенном модуле."""
+    conn = await asyncpg.connect(DATABASE_URL)
+    db_user_id = await conn.fetchval("SELECT id FROM users WHERE telegram_id = $1", user_id)
+    if not db_user_id:
+        await conn.close()
+        return None
+    
+    sql = """
+        SELECT day, module
+        FROM user_progress
+        WHERE user_id = $1 AND course_id = $2
+        ORDER BY day DESC, module DESC
+        LIMIT 1;
+    """
+    try:
+        row = await conn.fetchrow(sql, db_user_id, course_id)
+        if row:
+            return {'day': row['day'], 'module': row['module']}
+        return None
+    finally:
+        await conn.close()
+
+async def set_user_bookmark(user_id: int, course_id: int, day: int, module: int):
+    """Устанавливает закладку пользователя на конкретный день и модуль."""
+    conn = await asyncpg.connect(DATABASE_URL)
+    try:
+        await conn.execute(
+            "UPDATE users SET current_day = $1, current_module = $2 WHERE telegram_id = $3",
+            day, module, user_id
+        )
+    finally:
+        await conn.close()

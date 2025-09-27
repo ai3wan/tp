@@ -260,7 +260,18 @@ async def back_to_main_from_blocked_modules_course(message: Message):
 # 2. Нажатие на "Давай повторим"
 @router.message(F.text == "🔄 Давай повторим")
 async def repeat_module(message: Message, state: FSMContext):
-    await start_module(message, state)
+    user_id = message.from_user.id
+    bookmark = await db.get_user_bookmark(user_id)
+    
+    # Получаем информацию о последнем завершенном модуле
+    last_completed = await db.get_last_completed_module(user_id, bookmark['current_course_id'])
+    
+    if last_completed:
+        # Возвращаем закладку к последнему завершенному модулю
+        await db.set_user_bookmark(user_id, bookmark['current_course_id'], last_completed['day'], last_completed['module'])
+        await start_module(message, state)
+    else:
+        await message.answer("Ошибка: не удалось найти последний модуль для повторения.")
 
 # 3. Нажатие на "Все ясно"
 @router.message(F.text == "✅ Все ясно")
