@@ -285,6 +285,9 @@ async def handle_reset_progress_callback(callback: CallbackQuery):
         "📂 Все сохранённые данные исчезнут",
         reply_markup=confirm_kb
     )
+    
+    # Убираем главную клавиатуру
+    await callback.message.answer("", reply_markup=ReplyKeyboardRemove())
     await callback.answer()
 
 @router.callback_query(F.data == "confirm_reset")
@@ -301,12 +304,15 @@ async def handle_confirm_reset(callback: CallbackQuery):
     # Сбрасываем закладку пользователя
     await db.reset_user_bookmark(user_id)
     
-    await callback.message.edit_text(
-        "✨ Нажмите 👉 /start, если хотите запустить курс 🌿"
-    )
+    # Создаем инлайн кнопку для запуска курса
+    start_course_kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📘 Начать курс", callback_data="start_course")]
+    ])
     
-    # Убираем reply клавиатуру
-    await callback.message.answer("", reply_markup=ReplyKeyboardRemove())
+    await callback.message.edit_text(
+        "📘 Для запуска курса нажмите ▶️ /start",
+        reply_markup=start_course_kb
+    )
     await callback.answer()
 
 @router.callback_query(F.data == "cancel_reset")
@@ -315,4 +321,13 @@ async def handle_cancel_reset(callback: CallbackQuery):
     await callback.message.edit_text("Отмена сброса прогресса.")
     # Возвращаемся в главное меню
     await show_main_menu(callback.message, callback.from_user.id)
+    await callback.answer()
+
+@router.callback_query(F.data == "start_course")
+async def handle_start_course(callback: CallbackQuery):
+    """Обработчик для кнопки 'Начать курс' - отправляет команду /start."""
+    from aiogram.types import BotCommand
+    
+    # Отправляем команду /start
+    await callback.message.answer("/start")
     await callback.answer()
