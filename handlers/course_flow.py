@@ -166,8 +166,8 @@ async def show_course_completion(message: Message):
     else:  # difference >= 10
         result_message = "❤️ Видно, что тревожность усилилась. Попробуй ещё раз использовать практики, а если тревога мешает повседневной жизни — стоит обратиться к специалисту."
     
-    # Создаем инлайн клавиатуру для сброса прогресса
-    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+    # Создаем комбинированную клавиатуру: инлайн кнопка + удаление reply клавиатуры
+    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove
     reset_kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="Сбросить прогресс", callback_data="reset_progress")]
     ])
@@ -184,6 +184,9 @@ async def show_course_completion(message: Message):
         f"{result_message}",
         reply_markup=reset_kb
     )
+    
+    # Убираем главную клавиатуру отдельным сообщением
+    await message.answer(" ", reply_markup=ReplyKeyboardRemove())
 
 # Обработчик для кнопки "Оценить прогресс"
 @router.message(F.text == "Оценить прогресс")
