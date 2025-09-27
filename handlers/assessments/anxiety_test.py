@@ -213,6 +213,60 @@ async def q15_handler(message: Message, state: FSMContext):
         reply_markup=ReplyKeyboardRemove()
     )
 
+# Обработчик для завершения ФИНАЛЬНОГО теста (должен быть ПЕРЕД обработчиком начального теста)
+@router.message(AnxietyFinalTest.q15, F.text.regexp(r'^\d+$'))
+async def final_assessment_complete(message: Message, state: FSMContext):
+    print(f"DEBUG: Вызвана функция final_assessment_complete для пользователя {message.from_user.id}")  # Отладочная информация
+    self_assessment = int(message.text)
+    if not (0 <= self_assessment <= 10):
+        await message.answer("Пожалуйста, введи число от 0 до 10.")
+        return
+
+    data = await state.get_data()
+    final_score = data.get('score', 0)
+    print(f"DEBUG: final_score = {final_score}")  # Отладочная информация
+
+    # Получаем результат начального теста для сравнения
+    bookmark = await db.get_user_bookmark(message.from_user.id)
+    course_id = bookmark['current_course_id'] if bookmark and bookmark['current_course_id'] else 1
+    
+    # Получаем результаты всех тестов
+    all_results = await db.get_all_assessment_results(message.from_user.id, course_id)
+    print(f"DEBUG: all_results = {all_results}")  # Отладочная информация
+    initial_score = all_results.get('initial', {}).get('score', 0)
+    print(f"DEBUG: initial_score = {initial_score}")  # Отладочная информация
+    
+    # Сохраняем результат финального теста
+    await db.save_assessment_result(message.from_user.id, course_id, 'final', final_score, self_assessment)
+    print(f"DEBUG: Сохранен финальный результат: {final_score}")  # Отладочная информация
+    
+    # Вычисляем разницу
+    difference = final_score - initial_score
+    print(f"DEBUG: difference = {difference}")  # Отладочная информация
+    
+    # Определяем сообщение на основе разницы
+    if difference <= -10:
+        result_message = "✨ Отличный результат! Тревожность снизилась заметно. Продолжай использовать практики — они уже приносят плоды."
+    elif -9 <= difference <= -4:
+        result_message = "💫 Есть положительный сдвиг. Регулярная практика поможет закрепить результат и усилить эффект."
+    elif -3 <= difference <= 3:
+        result_message = "🌿 Значимых изменений пока нет. Продолжение практик или повторное прохождение курса может помочь."
+    elif 4 <= difference <= 9:
+        result_message = "⚖️ Уровень тревожности немного вырос. Попробуй вернуться к практикам или пройти курс заново, чтобы поддержать баланс."
+    else:  # difference >= 10
+        result_message = "❤️ Видно, что тревожность усилилась. Попробуй ещё раз использовать практики, а если тревога мешает повседневной жизни — стоит обратиться к специалисту."
+    
+    await message.answer(
+        f"📊 **Результаты сравнения**\n\n"
+        f"Пульс тревожности до курса: {initial_score}/42 баллов\n"
+        f"Пульс тревожности после курса: {final_score}/42 баллов\n"
+        f"Разница: {difference:+d} баллов\n\n"
+        f"{result_message}"
+    )
+    
+    await state.clear()
+    await show_main_menu(message, message.from_user.id)
+
 @router.message(AnxietyTest.q15, F.text.regexp(r'^\d+$'))
 async def assessment_final(message: Message, state: FSMContext):
     self_assessment = int(message.text)
@@ -302,59 +356,6 @@ async def final_q14(message: Message, state: FSMContext):
     await process_answer(message, state, AnxietyFinalTest.q15, "15. Оцени свою общую тревожность за последнюю неделю по шкале от 0 до 10, где 0 — совсем не тревожно, а 10 — очень тревожно.", None, q14_kb)
     await state.set_state(AnxietyFinalTest.q15)
 
-# Обработчик для завершения ФИНАЛЬНОГО теста
-@router.message(AnxietyFinalTest.q15, F.text.regexp(r'^\d+$'))
-async def final_assessment_complete(message: Message, state: FSMContext):
-    print(f"DEBUG: Вызвана функция final_assessment_complete для пользователя {message.from_user.id}")  # Отладочная информация
-    self_assessment = int(message.text)
-    if not (0 <= self_assessment <= 10):
-        await message.answer("Пожалуйста, введи число от 0 до 10.")
-        return
-
-    data = await state.get_data()
-    final_score = data.get('score', 0)
-    print(f"DEBUG: final_score = {final_score}")  # Отладочная информация
-
-    # Получаем результат начального теста для сравнения
-    bookmark = await db.get_user_bookmark(message.from_user.id)
-    course_id = bookmark['current_course_id'] if bookmark and bookmark['current_course_id'] else 1
-    
-    # Получаем результаты всех тестов
-    all_results = await db.get_all_assessment_results(message.from_user.id, course_id)
-    print(f"DEBUG: all_results = {all_results}")  # Отладочная информация
-    initial_score = all_results.get('initial', {}).get('score', 0)
-    print(f"DEBUG: initial_score = {initial_score}")  # Отладочная информация
-    
-    # Сохраняем результат финального теста
-    await db.save_assessment_result(message.from_user.id, course_id, 'final', final_score, self_assessment)
-    print(f"DEBUG: Сохранен финальный результат: {final_score}")  # Отладочная информация
-    
-    # Вычисляем разницу
-    difference = final_score - initial_score
-    print(f"DEBUG: difference = {difference}")  # Отладочная информация
-    
-    # Определяем сообщение на основе разницы
-    if difference <= -10:
-        result_message = "✨ Отличный результат! Тревожность снизилась заметно. Продолжай использовать практики — они уже приносят плоды."
-    elif -9 <= difference <= -4:
-        result_message = "💫 Есть положительный сдвиг. Регулярная практика поможет закрепить результат и усилить эффект."
-    elif -3 <= difference <= 3:
-        result_message = "🌿 Значимых изменений пока нет. Продолжение практик или повторное прохождение курса может помочь."
-    elif 4 <= difference <= 9:
-        result_message = "⚖️ Уровень тревожности немного вырос. Попробуй вернуться к практикам или пройти курс заново, чтобы поддержать баланс."
-    else:  # difference >= 10
-        result_message = "❤️ Видно, что тревожность усилилась. Попробуй ещё раз использовать практики, а если тревога мешает повседневной жизни — стоит обратиться к специалисту."
-    
-    await message.answer(
-        f"📊 **Результаты сравнения**\n\n"
-        f"Пульс тревожности до курса: {initial_score}/42 баллов\n"
-        f"Пульс тревожности после курса: {final_score}/42 баллов\n"
-        f"Разница: {difference:+d} баллов\n\n"
-        f"{result_message}"
-    )
-    
-    await state.clear()
-    await show_main_menu(message, message.from_user.id)
 
 # Обработчик для невалидных ответов на последний вопрос
 @router.message(AnxietyTest.q15)
