@@ -28,79 +28,92 @@ def get_step_keyboard(step: int) -> ReplyKeyboardMarkup:
     keyboards = {
         1: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="👍 Да, поехали"), KeyboardButton(text="У всех бывает тревога")]
+                [KeyboardButton(text="👍 Да, поехали"), KeyboardButton(text="У всех бывает тревога")],
+                [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         2: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="🚨 Тревога как сигнализация"), KeyboardButton(text="О как интересно")]
+                [KeyboardButton(text="🚨 Тревога как сигнализация"), KeyboardButton(text="О как интересно")],
+                [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         3: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="😮 Ясно"), KeyboardButton(text="Опасность, где её нет")]
+                [KeyboardButton(text="😮 Ясно"), KeyboardButton(text="Опасность, где её нет")],
+                [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         4: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="😅 Было такое"), KeyboardButton(text="Сердце бьётся быстрее")]
+                [KeyboardButton(text="😅 Было такое"), KeyboardButton(text="Сердце бьётся быстрее")],
+                [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         5: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="👍 Я понял"), KeyboardButton(text="Тревога — не слабость")]
+                [KeyboardButton(text="👍 Я понял"), KeyboardButton(text="Тревога — не слабость")],
+                [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         6: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="Перебарщивает тревога 😄"), KeyboardButton(text="Ага, понял")]
+                [KeyboardButton(text="Перебарщивает тревога 😄"), KeyboardButton(text="Ага, понял")],
+                [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         7: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="Дружить с тревогой 🤔"), KeyboardButton(text="Отлично!")]
+                [KeyboardButton(text="Дружить с тревогой 🤔"), KeyboardButton(text="Отлично!")],
+                [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         8: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="Дыхание — инструмент"), KeyboardButton(text="🙌 Звучит просто")]
+                [KeyboardButton(text="Дыхание — инструмент"), KeyboardButton(text="🙌 Звучит просто")],
+                [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         9: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="🔁 Замедлить дыхание"), KeyboardButton(text="Понял 👍")]
+                [KeyboardButton(text="🔁 Замедлить дыхание"), KeyboardButton(text="Понял 👍")],
+                [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         10: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="Вдох 4 — выдох 6"), KeyboardButton(text="Да, давай")]
+                [KeyboardButton(text="Вдох 4 — выдох 6"), KeyboardButton(text="Да, давай")],
+                [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         11: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="😊 Немного спокойнее"), KeyboardButton(text="Становится спокойнее")]
+                [KeyboardButton(text="😊 Немного спокойнее"), KeyboardButton(text="Становится спокойнее")],
+                [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         12: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="👍 Ясно"), KeyboardButton(text="Тревога — просто сигнал")]
+                [KeyboardButton(text="👍 Ясно"), KeyboardButton(text="Тревога — просто сигнал")],
+                [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         13: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="Вернёмся к дыханию"), KeyboardButton(text="Круто, спасибо 🙏")]
+                [KeyboardButton(text="Вернёмся к дыханию"), KeyboardButton(text="Круто, спасибо 🙏")],
+                [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         )
