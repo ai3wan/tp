@@ -276,13 +276,13 @@ async def handle_reset_progress_callback(callback: CallbackQuery):
     
     # Создаем клавиатуру подтверждения
     confirm_kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Да", callback_data="confirm_reset")],
-        [InlineKeyboardButton(text="НЕТ", callback_data="cancel_reset")]
+        [InlineKeyboardButton(text="👍 Да", callback_data="confirm_reset")],
+        [InlineKeyboardButton(text="🙅 Нет", callback_data="cancel_reset")]
     ])
     
     await callback.message.edit_text(
-        "Вы точно хотите сбросить прогресс?\n"
-        "(все данные будут удалены)",
+        "❓ Сбросить прогресс?\n"
+        "📂 Все сохранённые данные исчезнут",
         reply_markup=confirm_kb
     )
     await callback.answer()
@@ -302,16 +302,17 @@ async def handle_confirm_reset(callback: CallbackQuery):
     await db.reset_user_bookmark(user_id)
     
     await callback.message.edit_text(
-        "✅ Прогресс сброшен!\n\n"
-        "Теперь вы можете начать курс заново."
+        "✨ Нажмите 👉 /start, если хотите запустить курс 🌿"
     )
     
-    # Показываем главное меню
-    await show_main_menu(callback.message, user_id)
+    # Убираем reply клавиатуру
+    await callback.message.answer("", reply_markup=ReplyKeyboardRemove())
     await callback.answer()
 
 @router.callback_query(F.data == "cancel_reset")
 async def handle_cancel_reset(callback: CallbackQuery):
     """Обработчик для отмены сброса прогресса."""
     await callback.message.edit_text("Отмена сброса прогресса.")
+    # Возвращаемся в главное меню
+    await show_main_menu(callback.message, callback.from_user.id)
     await callback.answer()
