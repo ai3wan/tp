@@ -184,6 +184,9 @@ async def show_course_completion(message: Message):
         f"{result_message}",
         reply_markup=reset_kb
     )
+    
+    # Убираем главную клавиатуру
+    await message.answer(" ", reply_markup=ReplyKeyboardRemove())
 
 # Обработчик для кнопки "Оценить прогресс"
 @router.message(F.text == "Оценить прогресс")
@@ -285,9 +288,6 @@ async def handle_reset_progress_callback(callback: CallbackQuery):
         "📂 Все сохранённые данные исчезнут",
         reply_markup=confirm_kb
     )
-    
-    # Убираем главную клавиатуру
-    await callback.message.answer(" ", reply_markup=ReplyKeyboardRemove())
     await callback.answer()
 
 @router.callback_query(F.data == "confirm_reset")
