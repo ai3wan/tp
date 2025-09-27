@@ -30,7 +30,9 @@ async def start_handler(message: Message, state: FSMContext):
     if not bookmark or not bookmark['current_course_id']:
         await state.set_state(Onboarding.q1_thoughts)
         # Отправляем гифку с текстом
-        with open("assets/welcome_tp.gif", "rb") as gif_file:
+        import os
+        gif_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "welcome_tp.gif")
+        with open(gif_path, "rb") as gif_file:
             await message.answer_animation(
                 animation=gif_file,
                 caption="👋 **Привет!**\n\n"
