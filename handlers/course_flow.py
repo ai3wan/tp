@@ -51,7 +51,7 @@ async def show_main_menu(message: Message, user_id: int):
             ],
             resize_keyboard=True
         )
-        await message.answer("", reply_markup=main_menu_kb)
+        await message.answer("🔹", reply_markup=main_menu_kb)
         
     except Exception as e:
         print(f"Ошибка в show_main_menu: {e}")

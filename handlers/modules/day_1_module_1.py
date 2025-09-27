@@ -107,4 +107,4 @@ async def back_to_main_menu_from_module(message: Message, state: FSMContext):
         ],
         resize_keyboard=True
     )
-    await message.answer("", reply_markup=main_menu_kb)
+    await message.answer("🔹", reply_markup=main_menu_kb)
