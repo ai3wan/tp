@@ -244,6 +244,112 @@ async def assessment_final(message: Message, state: FSMContext):
     await message.answer("Отлично! Мы определили отправную точку. А теперь давай начнём наш первый урок!")
     await show_main_menu(message, message.from_user.id)
 
+# Обработчики для ФИНАЛЬНОГО теста (дублируем логику начального теста)
+@router.message(AnxietyFinalTest.q1)
+async def final_q1(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyFinalTest.q2, "2. Как ты спишь? 😴", q2_kb, q1_kb)
+
+@router.message(AnxietyFinalTest.q2)
+async def final_q2(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyFinalTest.q3, "3. Бывает ли у тебя напряжение в теле (плечи, шея, челюсти) без физической причины? 💆", q3_kb, q2_kb)
+
+@router.message(AnxietyFinalTest.q3)
+async def final_q3(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyFinalTest.q4, "4. Как часто у тебя возникают тревожные мысли о будущем? 🔮", q4_kb, q3_kb)
+
+@router.message(AnxietyFinalTest.q4)
+async def final_q4(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyFinalTest.q5, "5. Замечаешь ли ты учащённое сердцебиение, дрожь или потливость, когда тревожно? ❤️‍🔥", q5_kb, q4_kb)
+
+@router.message(AnxietyFinalTest.q5)
+async def final_q5(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyFinalTest.q6, "6. Как часто ты испытываешь раздражительность или вспышки гнева без серьёзной причины? 😠", q6_kb, q5_kb)
+
+@router.message(AnxietyFinalTest.q6)
+async def final_q6(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyFinalTest.q7, "7. Можешь ли ты спокойно сосредоточиться на задаче, когда вокруг стресс? 🎯", q7_kb, q6_kb)
+
+@router.message(AnxietyFinalTest.q7)
+async def final_q7(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyFinalTest.q8, "8. Как ты реагируешь на неожиданные трудности? 🚧", q8_kb, q7_kb)
+
+@router.message(AnxietyFinalTest.q8)
+async def final_q8(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyFinalTest.q9, "9. Часто ли ты избегаешь ситуаций, которые могут вызвать стресс или волнение? 🛑", q9_kb, q8_kb)
+
+@router.message(AnxietyFinalTest.q9)
+async def final_q9(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyFinalTest.q10, "10. Чувствуешь ли ты, что тревога мешает тебе отдыхать и наслаждаться жизнью? 🌴", q10_kb, q9_kb)
+
+@router.message(AnxietyFinalTest.q10)
+async def final_q10(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyFinalTest.q11, "11. Замечаешь ли ты, что тревога влияет на твоё здоровье (головные боли, желудок, усталость)? 💊", q11_kb, q10_kb)
+
+@router.message(AnxietyFinalTest.q11)
+async def final_q11(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyFinalTest.q12, "12. Насколько ты уверен(а) в своих силах справляться с трудностями? 💪", q12_kb, q11_kb)
+
+@router.message(AnxietyFinalTest.q12)
+async def final_q12(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyFinalTest.q13, "13. Как часто у тебя бывают трудности с дыханием или ощущение, что "не хватает воздуха" при тревоге? 🌬", q13_kb, q13_kb)
+
+@router.message(AnxietyFinalTest.q13)
+async def final_q13(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyFinalTest.q14, "14. Как часто тебе нужна поддержка других, чтобы успокоиться? 🤝", q14_kb, q13_kb)
+
+@router.message(AnxietyFinalTest.q14)
+async def final_q14(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyFinalTest.q15, "15. Оцени свою общую тревожность за последнюю неделю по шкале от 0 до 10, где 0 — совсем не тревожно, а 10 — очень тревожно.", None, q14_kb)
+    await state.set_state(AnxietyFinalTest.q15)
+
+# Обработчик для завершения ФИНАЛЬНОГО теста
+@router.message(AnxietyFinalTest.q15, F.text.regexp(r'^\d+$'))
+async def final_assessment_complete(message: Message, state: FSMContext):
+    self_assessment = int(message.text)
+    if not (0 <= self_assessment <= 10):
+        await message.answer("Пожалуйста, введи число от 0 до 10.")
+        return
+
+    data = await state.get_data()
+    final_score = data.get('score', 0)
+
+    # Получаем результат начального теста для сравнения
+    bookmark = await db.get_user_bookmark(message.from_user.id)
+    course_id = bookmark['current_course_id'] if bookmark and bookmark['current_course_id'] else 1
+    
+    # Получаем результаты всех тестов
+    all_results = await db.get_all_assessment_results(message.from_user.id, course_id)
+    initial_score = all_results.get('initial', {}).get('score', 0)
+    
+    # Сохраняем результат финального теста
+    await db.save_assessment_result(message.from_user.id, course_id, 'final', final_score, self_assessment)
+    
+    # Вычисляем разницу
+    difference = final_score - initial_score
+    
+    # Определяем сообщение на основе разницы
+    if difference <= -10:
+        result_message = "✨ Отличный результат! Тревожность снизилась заметно. Продолжай использовать практики — они уже приносят плоды."
+    elif -9 <= difference <= -4:
+        result_message = "💫 Есть положительный сдвиг. Регулярная практика поможет закрепить результат и усилить эффект."
+    elif -3 <= difference <= 3:
+        result_message = "🌿 Значимых изменений пока нет. Продолжение практик или повторное прохождение курса может помочь."
+    elif 4 <= difference <= 9:
+        result_message = "⚖️ Уровень тревожности немного вырос. Попробуй вернуться к практикам или пройти курс заново, чтобы поддержать баланс."
+    else:  # difference >= 10
+        result_message = "❤️ Видно, что тревожность усилилась. Попробуй ещё раз использовать практики, а если тревога мешает повседневной жизни — стоит обратиться к специалисту."
+    
+    await message.answer(
+        f"📊 **Результаты сравнения**\n\n"
+        f"Пульс тревожности до курса: {initial_score}/42 баллов\n"
+        f"Пульс тревожности после курса: {final_score}/42 баллов\n"
+        f"Разница: {difference:+d} баллов\n\n"
+        f"{result_message}"
+    )
+    
+    await state.clear()
+    await show_main_menu(message, message.from_user.id)
+
 # Обработчик для невалидных ответов на последний вопрос
 @router.message(AnxietyTest.q15)
 async def invalid_q15_answer(message: Message):
