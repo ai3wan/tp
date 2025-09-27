@@ -219,7 +219,7 @@ async def get_all_completed_modules_for_course(user_id: int, course_id: int):
         await conn.close()
         
 async def save_assessment_result(user_id: int, course_id: int, assessment_type: str, score: int, self_assessment: int):
-    """Сохраняет результаты тестирования в базу данных."""
+    """Сохраняет результаты пульса тревожности в базу данных."""
     conn = await asyncpg.connect(DATABASE_URL)
     db_user_id = await conn.fetchval("SELECT id FROM users WHERE telegram_id = $1", user_id)
     if not db_user_id:
@@ -236,7 +236,7 @@ async def save_assessment_result(user_id: int, course_id: int, assessment_type: 
         await conn.close()
         
 async def get_initial_assessment_result(user_id: int, course_id: int):
-    """Ищет результат начального тестирования для пользователя и курса."""
+    """Ищет результат начального пульса тревожности для пользователя и курса."""
     conn = await asyncpg.connect(DATABASE_URL)
     db_user_id = await conn.fetchval("SELECT id FROM users WHERE telegram_id = $1", user_id)
     if not db_user_id:
@@ -256,7 +256,7 @@ async def get_initial_assessment_result(user_id: int, course_id: int):
         await conn.close()
 
 async def get_all_assessment_results(user_id: int, course_id: int):
-    """Получает все результаты тестирования для пользователя и курса."""
+    """Получает все результаты пульса тревожности для пользователя и курса."""
     conn = await asyncpg.connect(DATABASE_URL)
     db_user_id = await conn.fetchval("SELECT id FROM users WHERE telegram_id = $1", user_id)
     if not db_user_id:

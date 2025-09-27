@@ -11,7 +11,7 @@ class Onboarding(StatesGroup):
     
 class Assessment(StatesGroup):
     """
-    Состояния для прохождения тестов до и после курса.
+    Состояния для прохождения пульса тревожности до и после курса.
     """
     initial_assessment = State()
     final_assessment = State()

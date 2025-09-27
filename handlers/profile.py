@@ -18,15 +18,15 @@ def create_progress_bar(completed: int, total: int) -> str:
     progress_percent = int((completed / total) * 10)
     return "🟩" * progress_percent + "⬜️" * (10 - progress_percent)
 
-# --- Вспомогательная функция для получения результатов всех тестов ---
+# --- Вспомогательная функция для получения результатов всех пульсов тревожности ---
 async def get_all_assessments_display(user_id: int, course_id: int) -> list:
-    """Возвращает список строк с результатами всех тестов."""
+    """Возвращает список строк с результатами всех пульсов тревожности."""
     import asyncpg
     conn = await asyncpg.connect(db.DATABASE_URL)
     try:
         db_user_id = await conn.fetchval("SELECT id FROM users WHERE telegram_id = $1", user_id)
         if not db_user_id:
-            return ["🔘 Тесты не пройдены"]
+            return ["🔘 Пульс тревожности не пройден"]
             
         sql = """
             SELECT assessment_type, score, self_assessment_score FROM assessment_results
@@ -36,7 +36,7 @@ async def get_all_assessments_display(user_id: int, course_id: int) -> list:
         results = await conn.fetch(sql, db_user_id, course_id)
         
         if not results:
-            return ["🔘 Тесты не пройдены"]
+            return ["🔘 Пульс тревожности не пройден"]
         
         assessments = []
         for result in results:
@@ -54,13 +54,13 @@ async def get_all_assessments_display(user_id: int, course_id: int) -> list:
             
             # Определяем название теста
             if assessment_type == 'initial':
-                test_name = "Входной тест"
+                test_name = "Пульс тревожности до курса"
             elif assessment_type == 'intermediate':
-                test_name = "Промежуточный тест"
+                test_name = "Промежуточный пульс тревожности"
             elif assessment_type == 'final':
-                test_name = "Финальный тест"
+                test_name = "Пульс тревожности после курса"
             else:
-                test_name = f"Тест ({assessment_type})"
+                test_name = f"Пульс тревожности ({assessment_type})"
             
             assessments.append(f"{indicator} {test_name}: {score}/42 баллов (самооценка: {self_assessment}/10)")
         
@@ -79,7 +79,7 @@ async def show_profile(message: Message):
     start_date = await db.get_user_start_date(user_id)
     all_courses_progress = await db.get_all_courses_progress(user_id)
     
-    # 2. Получаем результаты всех тестов
+    # 2. Получаем результаты всех пульсов тревожности
     assessments_display = await get_all_assessments_display(user_id, 1)  # Курс тревожности (ID = 1)
     
     # 3. Считаем статистику и готовим списки
@@ -109,9 +109,9 @@ async def show_profile(message: Message):
         "---"
     ]
 
-    # Добавляем результаты тестов
+    # Добавляем результаты пульсов тревожности
     if assessments_display:
-        profile_text.append("🧪 Результаты тестирования:")
+        profile_text.append("💓 Пульс тревожности:")
         for assessment in assessments_display:
             profile_text.append(f"• {assessment}")
         profile_text.append("\n---")
