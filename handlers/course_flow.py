@@ -189,6 +189,7 @@ async def show_course_completion(message: Message):
 @router.message(F.text == "🔄 Сбросить прогресс")
 async def handle_reset_progress_reply(message: Message):
     """Обработчик для кнопки 'Сбросить прогресс' через reply клавиатуру."""
+    from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
     await message.answer(
         "⚠️ Вы точно хотите сбросить прогресс?\n"
         "🗑️ Все данные будут удалены.",
@@ -222,6 +223,7 @@ async def handle_confirm_reset_reply(message: Message):
 @router.message(F.text == "Нет ❌")
 async def handle_cancel_reset_reply(message: Message):
     """Обработчик для отмены сброса прогресса."""
+    from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
     await message.answer(
         "❌ Сброс отменен",
         reply_markup=ReplyKeyboardMarkup(keyboard=[
