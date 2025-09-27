@@ -29,15 +29,15 @@ async def start_handler(message: Message, state: FSMContext):
     # Если курса нет, устанавливаем курс тревожности (ID = 1) и начинаем онбординг
     if not bookmark or not bookmark['current_course_id']:
         await state.set_state(Onboarding.q1_thoughts)
-        # Отправляем гифку с текстом
+        # Отправляем видео с текстом
         import os
         from aiogram.types import FSInputFile
         
-        gif_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "welcome_tp.gif")
-        gif_file = FSInputFile(gif_path)
+        video_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "welcome.mp4")
+        video_file = FSInputFile(video_path)
         
-        await message.answer_animation(
-            animation=gif_file,
+        await message.answer_video(
+            video=video_file,
             caption="👋 **Привет!**\n\n"
                     "Тихие практики — это пространство, где мы помогаем заботиться о своём эмоциональном здоровье и ментальном комфорте.\n\n"
                     "📚 **Здесь нет скучных лекций.**\n"
