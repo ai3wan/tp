@@ -186,7 +186,7 @@ async def show_course_completion(message: Message):
     )
     
     # Убираем главную клавиатуру отдельным сообщением
-    await message.answer("•", reply_markup=ReplyKeyboardRemove())
+    await message.answer("📂 Все сохранённые данные исчезнут", reply_markup=ReplyKeyboardRemove())
 
 # Обработчик для кнопки "Оценить прогресс"
 @router.message(F.text == "Оценить прогресс")
