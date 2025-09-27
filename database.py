@@ -244,8 +244,8 @@ async def reset_user_bookmark(user_id: int):
     
     try:
         await conn.execute(
-            "UPDATE user_bookmarks SET current_day = 1, current_module = 1 WHERE user_id = $1",
-            db_user_id
+            "UPDATE users SET current_day = 1, current_module = 1 WHERE telegram_id = $1",
+            user_id
         )
     finally:
         await conn.close()
