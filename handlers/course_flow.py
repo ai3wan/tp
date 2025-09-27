@@ -305,6 +305,7 @@ async def handle_confirm_reset(callback: CallbackQuery):
     await db.reset_user_bookmark(user_id)
     
     # Создаем инлайн кнопку для запуска курса
+    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
     start_course_kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="📘 Начать курс", callback_data="start_course")]
     ])
