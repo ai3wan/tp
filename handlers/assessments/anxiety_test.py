@@ -291,7 +291,7 @@ async def final_q11(message: Message, state: FSMContext):
 
 @router.message(AnxietyFinalTest.q12)
 async def final_q12(message: Message, state: FSMContext):
-    await process_answer(message, state, AnxietyFinalTest.q13, "13. Как часто у тебя бывают трудности с дыханием или ощущение, что "не хватает воздуха" при тревоге? 🌬", q13_kb, q13_kb)
+    await process_answer(message, state, AnxietyFinalTest.q13, "13. Как часто у тебя бывают трудности с дыханием или ощущение, что \"не хватает воздуха\" при тревоге? 🌬", q13_kb, q13_kb)
 
 @router.message(AnxietyFinalTest.q13)
 async def final_q13(message: Message, state: FSMContext):
