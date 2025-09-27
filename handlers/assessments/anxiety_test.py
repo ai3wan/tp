@@ -305,6 +305,7 @@ async def final_q14(message: Message, state: FSMContext):
 # Обработчик для завершения ФИНАЛЬНОГО теста
 @router.message(AnxietyFinalTest.q15, F.text.regexp(r'^\d+$'))
 async def final_assessment_complete(message: Message, state: FSMContext):
+    print(f"DEBUG: Вызвана функция final_assessment_complete для пользователя {message.from_user.id}")  # Отладочная информация
     self_assessment = int(message.text)
     if not (0 <= self_assessment <= 10):
         await message.answer("Пожалуйста, введи число от 0 до 10.")
@@ -312,6 +313,7 @@ async def final_assessment_complete(message: Message, state: FSMContext):
 
     data = await state.get_data()
     final_score = data.get('score', 0)
+    print(f"DEBUG: final_score = {final_score}")  # Отладочная информация
 
     # Получаем результат начального теста для сравнения
     bookmark = await db.get_user_bookmark(message.from_user.id)
@@ -319,13 +321,17 @@ async def final_assessment_complete(message: Message, state: FSMContext):
     
     # Получаем результаты всех тестов
     all_results = await db.get_all_assessment_results(message.from_user.id, course_id)
+    print(f"DEBUG: all_results = {all_results}")  # Отладочная информация
     initial_score = all_results.get('initial', {}).get('score', 0)
+    print(f"DEBUG: initial_score = {initial_score}")  # Отладочная информация
     
     # Сохраняем результат финального теста
     await db.save_assessment_result(message.from_user.id, course_id, 'final', final_score, self_assessment)
+    print(f"DEBUG: Сохранен финальный результат: {final_score}")  # Отладочная информация
     
     # Вычисляем разницу
     difference = final_score - initial_score
+    print(f"DEBUG: difference = {difference}")  # Отладочная информация
     
     # Определяем сообщение на основе разницы
     if difference <= -10:
