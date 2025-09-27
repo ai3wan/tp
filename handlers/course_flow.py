@@ -166,11 +166,8 @@ async def show_course_completion(message: Message):
     else:  # difference >= 10
         result_message = "❤️ Видно, что тревожность усилилась. Попробуй ещё раз использовать практики, а если тревога мешает повседневной жизни — стоит обратиться к специалисту."
     
-    # Создаем комбинированную клавиатуру: инлайн кнопка + удаление reply клавиатуры
-    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove
-    reset_kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Сбросить прогресс", callback_data="reset_progress")]
-    ])
+    # Создаем reply клавиатуру для сброса прогресса
+    from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
     
     await message.answer(
         f"🎉 Поздравляем!\n"
@@ -182,11 +179,38 @@ async def show_course_completion(message: Message):
         f"Пульс тревожности после курса: {final_score}/42 баллов\n"
         f"Разница: {difference:+d} баллов\n\n"
         f"{result_message}",
-        reply_markup=reset_kb
+        reply_markup=ReplyKeyboardMarkup(keyboard=[
+            [KeyboardButton(text="🔄 Сбросить прогресс")],
+            [KeyboardButton(text="🏠 В главное меню")]
+        ], resize_keyboard=True)
     )
+
+# Обработчик для кнопки "🔄 Сбросить прогресс"
+@router.message(F.text == "🔄 Сбросить прогресс")
+async def handle_reset_progress_reply(message: Message):
+    """Обработчик для кнопки 'Сбросить прогресс' через reply клавиатуру."""
+    user_id = message.from_user.id
+    bookmark = await db.get_user_bookmark(user_id)
+    course_id = bookmark['current_course_id'] if bookmark and bookmark['current_course_id'] else 1
     
-    # Убираем главную клавиатуру отдельным сообщением
-    await message.answer("📂 Все сохранённые данные исчезнут", reply_markup=ReplyKeyboardRemove())
+    # Сбрасываем прогресс и оценки
+    await db.reset_progress_for_course(user_id, course_id)
+    await db.reset_assessment_results(user_id, course_id)
+    
+    # Сбрасываем закладку пользователя
+    await db.reset_user_bookmark(user_id)
+    
+    await message.answer(
+        "✅ Прогресс сброшен!\n\n"
+        "📘 Для запуска курса нажмите ▶️ /start",
+        reply_markup=ReplyKeyboardRemove()
+    )
+
+# Обработчик для кнопки "🏠 В главное меню"
+@router.message(F.text == "🏠 В главное меню")
+async def back_to_main_from_completion(message: Message):
+    """Возврат в главное меню из поздравления."""
+    await show_main_menu(message, message.from_user.id)
 
 # Обработчик для кнопки "Оценить прогресс"
 @router.message(F.text == "Оценить прогресс")
@@ -271,68 +295,4 @@ async def back_to_main_menu(message: Message):
     await message.answer("Возвращаю вас в главное меню.", reply_markup=ReplyKeyboardRemove())
     await show_main_menu(message, message.from_user.id)
 
-# Обработчики для инлайн кнопок
-@router.callback_query(F.data == "reset_progress")
-async def handle_reset_progress_callback(callback: CallbackQuery):
-    """Обработчик для кнопки 'Сбросить прогресс'."""
-    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-    
-    # Создаем клавиатуру подтверждения
-    confirm_kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="👍 Да", callback_data="confirm_reset")],
-        [InlineKeyboardButton(text="🙅 Нет", callback_data="cancel_reset")]
-    ])
-    
-    await callback.message.edit_text(
-        "❓ Сбросить прогресс?\n"
-        "📂 Все сохранённые данные исчезнут",
-        reply_markup=confirm_kb
-    )
-    await callback.answer()
-
-@router.callback_query(F.data == "confirm_reset")
-async def handle_confirm_reset(callback: CallbackQuery):
-    """Обработчик для подтверждения сброса прогресса."""
-    user_id = callback.from_user.id
-    bookmark = await db.get_user_bookmark(user_id)
-    course_id = bookmark['current_course_id'] if bookmark and bookmark['current_course_id'] else 1
-    
-    # Сбрасываем прогресс и оценки
-    await db.reset_progress_for_course(user_id, course_id)
-    await db.reset_assessment_results(user_id, course_id)
-    
-    # Сбрасываем закладку пользователя
-    await db.reset_user_bookmark(user_id)
-    
-    # Изменяем сообщение "📂 Все сохранённые данные исчезнут" на "✅ Прогресс сброшен!"
-    await callback.message.edit_text("✅ Прогресс сброшен!")
-    
-    # Создаем инлайн кнопку для запуска курса
-    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-    start_course_kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="📘 Начать курс", callback_data="start_course")]
-    ])
-    
-    await callback.message.answer(
-        "📘 Для запуска курса нажмите ▶️ /start",
-        reply_markup=start_course_kb
-    )
-    await callback.answer()
-
-@router.callback_query(F.data == "cancel_reset")
-async def handle_cancel_reset(callback: CallbackQuery):
-    """Обработчик для отмены сброса прогресса."""
-    # Изменяем сообщение "📂 Все сохранённые данные исчезнут" на "❌ Сброс отменен"
-    await callback.message.edit_text("❌ Сброс отменен")
-    # Возвращаемся в главное меню
-    await show_main_menu(callback.message, callback.from_user.id)
-    await callback.answer()
-
-@router.callback_query(F.data == "start_course")
-async def handle_start_course(callback: CallbackQuery):
-    """Обработчик для кнопки 'Начать курс' - отправляет команду /start."""
-    from aiogram.types import BotCommand
-    
-    # Отправляем команду /start
-    await callback.message.answer("/start")
-    await callback.answer()
+# Обработчики для инлайн кнопок (удалены - заменены на reply кнопки)
