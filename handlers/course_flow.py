@@ -189,6 +189,18 @@ async def show_course_completion(message: Message):
 @router.message(F.text == "🔄 Сбросить прогресс")
 async def handle_reset_progress_reply(message: Message):
     """Обработчик для кнопки 'Сбросить прогресс' через reply клавиатуру."""
+    await message.answer(
+        "⚠️ Вы точно хотите сбросить прогресс?\n"
+        "🗑️ Все данные будут удалены.",
+        reply_markup=ReplyKeyboardMarkup(keyboard=[
+            [KeyboardButton(text="Да ✅"), KeyboardButton(text="Нет ❌")]
+        ], resize_keyboard=True)
+    )
+
+# Обработчик для кнопки "Да ✅"
+@router.message(F.text == "Да ✅")
+async def handle_confirm_reset_reply(message: Message):
+    """Обработчик для подтверждения сброса прогресса."""
     user_id = message.from_user.id
     bookmark = await db.get_user_bookmark(user_id)
     course_id = bookmark['current_course_id'] if bookmark and bookmark['current_course_id'] else 1
@@ -204,6 +216,18 @@ async def handle_reset_progress_reply(message: Message):
         "✅ Прогресс сброшен!\n\n"
         "📘 Для запуска курса нажмите ▶️ /start",
         reply_markup=ReplyKeyboardRemove()
+    )
+
+# Обработчик для кнопки "Нет ❌"
+@router.message(F.text == "Нет ❌")
+async def handle_cancel_reset_reply(message: Message):
+    """Обработчик для отмены сброса прогресса."""
+    await message.answer(
+        "❌ Сброс отменен",
+        reply_markup=ReplyKeyboardMarkup(keyboard=[
+            [KeyboardButton(text="🔄 Сбросить прогресс")],
+            [KeyboardButton(text="🏠 В главное меню")]
+        ], resize_keyboard=True)
     )
 
 # Обработчик для кнопки "🏠 В главное меню"
