@@ -83,7 +83,7 @@ module_navigation_kb = ReplyKeyboardMarkup(
 
 after_module_kb = ReplyKeyboardMarkup(
     keyboard=[
-        [KeyboardButton(text="▶️ Двигаемся дальше")],
+        [KeyboardButton(text="▶️ Двигаемся дальше"), KeyboardButton(text="🔄 Давай повторим")],
         [KeyboardButton(text="🏠 В основное меню")]
     ],
     resize_keyboard=True
