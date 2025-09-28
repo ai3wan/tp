@@ -19,9 +19,9 @@ class Day1Module1States(StatesGroup):
     step_8 = State()  # Дыхание как инструмент
     step_9 = State()  # Дыхание и тревога
     step_10 = State()  # Практика дыхания
-    step_11 = State()  # Результат практики
-    step_12 = State()  # Вывод
-    step_13 = State()  # Видео практики
+    step_11 = State()  # Видео практики
+    step_12 = State()  # Результат практики
+    step_13 = State()  # Вывод
     step_14 = State()  # Мотивация
 
 def get_step_keyboard(step: int) -> ReplyKeyboardMarkup:
@@ -99,32 +99,32 @@ def get_step_keyboard(step: int) -> ReplyKeyboardMarkup:
         ),
         11: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="😊 Немного спокойнее"), KeyboardButton(text="Становится спокойнее")],
+                [KeyboardButton(text="😊 Стало спокойнее"), KeyboardButton(text="🤔 Нужно ещё потренироваться")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         12: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="👍 Ясно"), KeyboardButton(text="Тревога — просто сигнал")],
+                [KeyboardButton(text="😊 Немного спокойнее"), KeyboardButton(text="Становится спокойнее")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         13: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="😊 Стало спокойнее"), KeyboardButton(text="🤔 Нужно ещё потренироваться")],
+                [KeyboardButton(text="👍 Ясно"), KeyboardButton(text="Тревога — просто сигнал")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         14: ReplyKeyboardMarkup(
-            keyboard=[
+        keyboard=[
                 [KeyboardButton(text="🌟 Супер"), KeyboardButton(text="🌬 Буду практиковать")],
-                [KeyboardButton(text="🏠 В основное меню")]
-            ],
-            resize_keyboard=True
-        )
+            [KeyboardButton(text="🏠 В основное меню")]
+        ],
+        resize_keyboard=True
+    )
     }
     return keyboards.get(step, ReplyKeyboardMarkup(keyboard=[], resize_keyboard=True))
 
@@ -317,40 +317,11 @@ async def step_9_to_10(message: Message, state: FSMContext):
         reply_markup=get_step_keyboard(10)
     )
 
-# Шаг 10 -> Шаг 11
+# Шаг 10 -> Шаг 11 (Видео практики)
 @router.message(Day1Module1States.step_10, F.text.in_(["Вдох 4 — выдох 6", "Да, давай"]))
 async def step_10_to_11(message: Message, state: FSMContext):
     """Переход от шага 10 к шагу 11."""
     await state.set_state(Day1Module1States.step_11)
-    
-    # Отправляем картинку с текстом
-    import os
-    from aiogram.types import FSInputFile
-    
-    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_11.png")
-    image_file = FSInputFile(image_path)
-    
-    await message.answer_photo(
-        photo=image_file,
-        caption="Хорошо 👏 Обрати внимание: после этих нескольких дыханий тело чуть расслабляется, мысли становятся спокойнее. Это простой, но мощный способ «снизить громкость» тревоги.",
-        reply_markup=get_step_keyboard(11)
-    )
-
-# Шаг 11 -> Шаг 12
-@router.message(Day1Module1States.step_11, F.text.in_(["😊 Немного спокойнее", "Становится спокойнее"]))
-async def step_11_to_12(message: Message, state: FSMContext):
-    """Переход от шага 11 к шагу 12."""
-    await state.set_state(Day1Module1States.step_12)
-    await message.answer(
-        "Итак, вывод: тревога сама по себе не опасна, она лишь сигнал. Но у тебя есть инструмент — дыхание. Ты можешь использовать его всегда, когда тревога слишком настойчива.",
-        reply_markup=get_step_keyboard(12)
-    )
-
-# Шаг 12 -> Шаг 13
-@router.message(Day1Module1States.step_12, F.text.in_(["👍 Ясно", "Тревога — просто сигнал"]))
-async def step_12_to_13(message: Message, state: FSMContext):
-    """Переход от шага 12 к шагу 13."""
-    await state.set_state(Day1Module1States.step_13)
     
     # Отправляем видео с текстом
     import os
@@ -362,11 +333,40 @@ async def step_12_to_13(message: Message, state: FSMContext):
     await message.answer_video(
         video=video_file,
         caption="🧘 Первая практика курса — дыхание 4–6.\nСмотри на видео: 🔽 круг сужается — вдох, 🔼 расширяется — выдох.\n⏱ Подыши так несколько минут с таймером.",
+        reply_markup=get_step_keyboard(11)
+    )
+
+# Шаг 11 -> Шаг 12 (Результат практики)
+@router.message(Day1Module1States.step_11, F.text.in_(["😊 Стало спокойнее", "🤔 Нужно ещё потренироваться"]))
+async def step_11_to_12(message: Message, state: FSMContext):
+    """Переход от шага 11 к шагу 12."""
+    await state.set_state(Day1Module1States.step_12)
+    
+    # Отправляем картинку с текстом
+    import os
+    from aiogram.types import FSInputFile
+    
+    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_11.png")
+    image_file = FSInputFile(image_path)
+    
+    await message.answer_photo(
+        photo=image_file,
+        caption="Хорошо 👏 Обрати внимание: после этих нескольких дыханий тело чуть расслабляется, мысли становятся спокойнее. Это простой, но мощный способ «снизить громкость» тревоги.",
+        reply_markup=get_step_keyboard(12)
+    )
+
+# Шаг 12 -> Шаг 13 (Вывод)
+@router.message(Day1Module1States.step_12, F.text.in_(["😊 Немного спокойнее", "Становится спокойнее"]))
+async def step_12_to_13(message: Message, state: FSMContext):
+    """Переход от шага 12 к шагу 13."""
+    await state.set_state(Day1Module1States.step_13)
+    await message.answer(
+        "Итак, вывод: тревога сама по себе не опасна, она лишь сигнал. Но у тебя есть инструмент — дыхание. Ты можешь использовать его всегда, когда тревога слишком настойчива.",
         reply_markup=get_step_keyboard(13)
     )
 
-# Шаг 13 -> Шаг 14
-@router.message(Day1Module1States.step_13, F.text.in_(["😊 Стало спокойнее", "🤔 Нужно ещё потренироваться"]))
+# Шаг 13 -> Шаг 14 (Мотивация)
+@router.message(Day1Module1States.step_13, F.text.in_(["👍 Ясно", "Тревога — просто сигнал"]))
 async def step_13_to_14(message: Message, state: FSMContext):
     """Переход от шага 13 к шагу 14."""
     await state.set_state(Day1Module1States.step_14)
