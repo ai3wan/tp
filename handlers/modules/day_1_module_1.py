@@ -21,7 +21,9 @@ class Day1Module1States(StatesGroup):
     step_10 = State()  # Практика дыхания
     step_11 = State()  # Результат практики
     step_12 = State()  # Вывод
-    step_13 = State()  # Завершение
+    step_13 = State()  # Видео практики
+    step_14 = State()  # Мотивация
+    step_15 = State()  # Завершение
 
 def get_step_keyboard(step: int) -> ReplyKeyboardMarkup:
     """Возвращает клавиатуру для конкретного шага диалога."""
@@ -112,7 +114,21 @@ def get_step_keyboard(step: int) -> ReplyKeyboardMarkup:
         ),
         13: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="Вернёмся к дыханию"), KeyboardButton(text="Круто, спасибо 🙏")],
+                [KeyboardButton(text="😊 Стало спокойнее"), KeyboardButton(text="🤔 Нужно ещё потренироваться")],
+                [KeyboardButton(text="🏠 В основное меню")]
+            ],
+            resize_keyboard=True
+        ),
+        14: ReplyKeyboardMarkup(
+            keyboard=[
+                [KeyboardButton(text="😊 Стало спокойнее"), KeyboardButton(text="🤔 Нужно ещё потренироваться")],
+                [KeyboardButton(text="🏠 В основное меню")]
+            ],
+            resize_keyboard=True
+        ),
+        15: ReplyKeyboardMarkup(
+            keyboard=[
+                [KeyboardButton(text="▶️ Двигаемся дальше"), KeyboardButton(text="🔄 Давай повторим")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
@@ -343,13 +359,42 @@ async def step_11_to_12(message: Message, state: FSMContext):
 async def step_12_to_13(message: Message, state: FSMContext):
     """Переход от шага 12 к шагу 13."""
     await state.set_state(Day1Module1States.step_13)
-    await message.answer(
-        "Сегодня мы ещё дважды вернёмся к этой практике: днём и вечером. Чем чаще будешь пробовать, тем привычнее станет регулировать своё состояние.",
+    
+    # Отправляем видео с текстом
+    import os
+    from aiogram.types import FSInputFile
+    
+    video_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "practice_1.mp4")
+    video_file = FSInputFile(video_path)
+    
+    await message.answer_video(
+        video=video_file,
+        caption="🧘 Первая практика курса — дыхание 4–6.\nСмотри на видео: 🔽 круг сужается — вдох, 🔼 расширяется — выдох.\n⏱ Подыши так несколько минут с таймером.",
         reply_markup=get_step_keyboard(13)
     )
 
-# Шаг 13 -> Завершение модуля
-@router.message(Day1Module1States.step_13, F.text.in_(["Вернёмся к дыханию", "Круто, спасибо 🙏"]))
+# Шаг 13 -> Шаг 14
+@router.message(Day1Module1States.step_13, F.text.in_(["😊 Стало спокойнее", "🤔 Нужно ещё потренироваться"]))
+async def step_13_to_14(message: Message, state: FSMContext):
+    """Переход от шага 13 к шагу 14."""
+    await state.set_state(Day1Module1States.step_14)
+    await message.answer(
+        "Сегодня мы ещё дважды вернёмся к этой практике: 🌞 днём и 🌙 вечером.\nЧем чаще будешь пробовать, тем привычнее станет регулировать своё состояние ⚖️✨",
+        reply_markup=get_step_keyboard(14)
+    )
+
+# Шаг 14 -> Шаг 15
+@router.message(Day1Module1States.step_14, F.text.in_(["😊 Стало спокойнее", "🤔 Нужно ещё потренироваться"]))
+async def step_14_to_15(message: Message, state: FSMContext):
+    """Переход от шага 14 к шагу 15."""
+    await state.set_state(Day1Module1States.step_15)
+    await message.answer(
+        "🌟 Отличная работа! Первый урок завершён.\nТеперь у тебя есть понимание, что такое тревога, и первый инструмент, чтобы с ней справляться — дыхание 4–6 🌬️.\nЭто только начало пути к спокойствию и внутренней силе 💪✨",
+        reply_markup=get_step_keyboard(15)
+    )
+
+# Шаг 15 -> Завершение модуля
+@router.message(Day1Module1States.step_15, F.text.in_(["▶️ Двигаемся дальше", "🔄 Давай повторим"]))
 async def complete_day_1_module_1(message: Message, state: FSMContext):
     """Завершает модуль и переходит к следующему."""
     from handlers.course_flow import complete_module
