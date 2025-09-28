@@ -23,7 +23,6 @@ class Day1Module1States(StatesGroup):
     step_12 = State()  # Вывод
     step_13 = State()  # Видео практики
     step_14 = State()  # Мотивация
-    step_15 = State()  # Завершение
 
 def get_step_keyboard(step: int) -> ReplyKeyboardMarkup:
     """Возвращает клавиатуру для конкретного шага диалога."""
@@ -122,13 +121,6 @@ def get_step_keyboard(step: int) -> ReplyKeyboardMarkup:
         14: ReplyKeyboardMarkup(
             keyboard=[
                 [KeyboardButton(text="🌟 Супер"), KeyboardButton(text="🌬 Буду практиковать")],
-                [KeyboardButton(text="🏠 В основное меню")]
-            ],
-            resize_keyboard=True
-        ),
-        15: ReplyKeyboardMarkup(
-            keyboard=[
-                [KeyboardButton(text="▶️ Двигаемся дальше"), KeyboardButton(text="🔄 Давай повторим")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
@@ -383,18 +375,8 @@ async def step_13_to_14(message: Message, state: FSMContext):
         reply_markup=get_step_keyboard(14)
     )
 
-# Шаг 14 -> Шаг 15
+# Шаг 14 -> Завершение модуля
 @router.message(Day1Module1States.step_14, F.text.in_(["🌟 Супер", "🌬 Буду практиковать"]))
-async def step_14_to_15(message: Message, state: FSMContext):
-    """Переход от шага 14 к шагу 15."""
-    await state.set_state(Day1Module1States.step_15)
-    await message.answer(
-        "🌟 Отличная работа! Первый модуль завершён.\nТеперь у тебя есть понимание, что такое тревога, и первый инструмент, чтобы с ней справляться — дыхание 4–6 🌬️.\nЭто только начало пути к спокойствию и внутренней силе 💪✨",
-        reply_markup=get_step_keyboard(15)
-    )
-
-# Шаг 15 -> Завершение модуля
-@router.message(Day1Module1States.step_15, F.text.in_(["▶️ Двигаемся дальше", "🔄 Давай повторим"]))
 async def complete_day_1_module_1(message: Message, state: FSMContext):
     """Завершает модуль и переходит к следующему."""
     from handlers.course_flow import complete_module
