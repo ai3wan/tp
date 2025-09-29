@@ -28,91 +28,91 @@ def get_step_keyboard(step: int) -> ReplyKeyboardMarkup:
     keyboards = {
         1: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="👍 Да, поехали"), KeyboardButton(text="У всех бывает тревога")],
+                [KeyboardButton(text="👍 Да, поехали")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         2: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="🚨 Тревога как сигнализация"), KeyboardButton(text="О как интересно")],
+                [KeyboardButton(text="🚨 Тревога как сигнализация")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         3: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="😮 Ясно"), KeyboardButton(text="Опасность, где её нет")],
+                [KeyboardButton(text="👀 Опасность, где её нет")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         4: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="😅 Было такое"), KeyboardButton(text="Сердце бьётся быстрее")],
+                [KeyboardButton(text="😅 Было такое")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         5: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="👍 Я понял"), KeyboardButton(text="Тревога — не слабость")],
+                [KeyboardButton(text="💪 Тревога — не слабость")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         6: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="Перебарщивает тревога 😄"), KeyboardButton(text="Ага, понял")],
+                [KeyboardButton(text="🙃 Перебарщивает тревога")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         7: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="Дружить с тревогой 🤔"), KeyboardButton(text="Отлично!")],
+                [KeyboardButton(text="🤔 Дружить с тревогой")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         8: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="Дыхание — инструмент"), KeyboardButton(text="🙌 Звучит просто")],
+                [KeyboardButton(text="🌬️ Дыхание — инструмент")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         9: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="🔁 Замедлить дыхание"), KeyboardButton(text="Понял 👍")],
+                [KeyboardButton(text="🔁 Замедлить дыхание")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         10: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="Вдох 4 — выдох 6"), KeyboardButton(text="Да, давай")],
+                [KeyboardButton(text="⏱️ Вдох 4 — выдох 6")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         11: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="😊 Стало спокойнее"), KeyboardButton(text="🤔 Нужно ещё потренироваться")],
+                [KeyboardButton(text="😊 Стало спокойнее")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         12: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="😊 Немного спокойнее"), KeyboardButton(text="Становится спокойнее")],
+                [KeyboardButton(text="🌿 Лучше")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
         ),
         13: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="👍 Ясно"), KeyboardButton(text="Тревога — просто сигнал")],
+                [KeyboardButton(text="⚖️ Тревога — просто сигнал")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
@@ -150,7 +150,7 @@ async def start_day_1_module_1(message: Message, state: FSMContext):
     )
 
 # Шаг 1 -> Шаг 2
-@router.message(Day1Module1States.step_1, F.text.in_(["👍 Да, поехали", "У всех бывает тревога"]))
+@router.message(Day1Module1States.step_1, F.text == "👍 Да, поехали")
 async def step_1_to_2(message: Message, state: FSMContext):
     """Переход от шага 1 к шагу 2."""
     await state.set_state(Day1Module1States.step_2)
@@ -179,7 +179,7 @@ async def step_1_to_2(message: Message, state: FSMContext):
     )
 
 # Шаг 2 -> Шаг 3
-@router.message(Day1Module1States.step_2, F.text.in_(["🚨 Тревога как сигнализация", "О как интересно"]))
+@router.message(Day1Module1States.step_2, F.text == "🚨 Тревога как сигнализация")
 async def step_2_to_3(message: Message, state: FSMContext):
     """Переход от шага 2 к шагу 3."""
     await state.set_state(Day1Module1States.step_3)
@@ -208,7 +208,7 @@ async def step_2_to_3(message: Message, state: FSMContext):
     )
 
 # Шаг 3 -> Шаг 4
-@router.message(Day1Module1States.step_3, F.text.in_(["😮 Ясно", "Опасность, где её нет"]))
+@router.message(Day1Module1States.step_3, F.text == "👀 Опасность, где её нет")
 async def step_3_to_4(message: Message, state: FSMContext):
     """Переход от шага 3 к шагу 4."""
     await state.set_state(Day1Module1States.step_4)
@@ -237,7 +237,7 @@ async def step_3_to_4(message: Message, state: FSMContext):
     )
 
 # Шаг 4 -> Шаг 5
-@router.message(Day1Module1States.step_4, F.text.in_(["😅 Было такое", "Сердце бьётся быстрее"]))
+@router.message(Day1Module1States.step_4, F.text == "😅 Было такое")
 async def step_4_to_5(message: Message, state: FSMContext):
     """Переход от шага 4 к шагу 5."""
     await state.set_state(Day1Module1States.step_5)
@@ -266,7 +266,7 @@ async def step_4_to_5(message: Message, state: FSMContext):
     )
 
 # Шаг 5 -> Шаг 6
-@router.message(Day1Module1States.step_5, F.text.in_(["👍 Я понял", "Тревога — не слабость"]))
+@router.message(Day1Module1States.step_5, F.text == "💪 Тревога — не слабость")
 async def step_5_to_6(message: Message, state: FSMContext):
     """Переход от шага 5 к шагу 6."""
     await state.set_state(Day1Module1States.step_6)
@@ -295,7 +295,7 @@ async def step_5_to_6(message: Message, state: FSMContext):
     )
 
 # Шаг 6 -> Шаг 7
-@router.message(Day1Module1States.step_6, F.text.in_(["Перебарщивает тревога 😄", "Ага, понял"]))
+@router.message(Day1Module1States.step_6, F.text == "🙃 Перебарщивает тревога")
 async def step_6_to_7(message: Message, state: FSMContext):
     """Переход от шага 6 к шагу 7."""
     await state.set_state(Day1Module1States.step_7)
@@ -324,7 +324,7 @@ async def step_6_to_7(message: Message, state: FSMContext):
     )
 
 # Шаг 7 -> Шаг 8
-@router.message(Day1Module1States.step_7, F.text.in_(["Дружить с тревогой 🤔", "Отлично!"]))
+@router.message(Day1Module1States.step_7, F.text == "🤔 Дружить с тревогой")
 async def step_7_to_8(message: Message, state: FSMContext):
     """Переход от шага 7 к шагу 8."""
     await state.set_state(Day1Module1States.step_8)
@@ -353,7 +353,7 @@ async def step_7_to_8(message: Message, state: FSMContext):
     )
 
 # Шаг 8 -> Шаг 9
-@router.message(Day1Module1States.step_8, F.text.in_(["Дыхание — инструмент", "🙌 Звучит просто"]))
+@router.message(Day1Module1States.step_8, F.text == "🌬️ Дыхание — инструмент")
 async def step_8_to_9(message: Message, state: FSMContext):
     """Переход от шага 8 к шагу 9."""
     await state.set_state(Day1Module1States.step_9)
@@ -382,7 +382,7 @@ async def step_8_to_9(message: Message, state: FSMContext):
     )
 
 # Шаг 9 -> Шаг 10
-@router.message(Day1Module1States.step_9, F.text.in_(["🔁 Замедлить дыхание", "Понял 👍"]))
+@router.message(Day1Module1States.step_9, F.text == "🔁 Замедлить дыхание")
 async def step_9_to_10(message: Message, state: FSMContext):
     """Переход от шага 9 к шагу 10."""
     await state.set_state(Day1Module1States.step_10)
@@ -411,7 +411,7 @@ async def step_9_to_10(message: Message, state: FSMContext):
     )
 
 # Шаг 10 -> Шаг 11 (Видео практики)
-@router.message(Day1Module1States.step_10, F.text.in_(["Вдох 4 — выдох 6", "Да, давай"]))
+@router.message(Day1Module1States.step_10, F.text == "⏱️ Вдох 4 — выдох 6")
 async def step_10_to_11(message: Message, state: FSMContext):
     """Переход от шага 10 к шагу 11."""
     await state.set_state(Day1Module1States.step_11)
@@ -430,7 +430,7 @@ async def step_10_to_11(message: Message, state: FSMContext):
     )
 
 # Шаг 11 -> Шаг 12 (Результат практики)
-@router.message(Day1Module1States.step_11, F.text.in_(["😊 Стало спокойнее", "🤔 Нужно ещё потренироваться"]))
+@router.message(Day1Module1States.step_11, F.text == "😊 Стало спокойнее")
 async def step_11_to_12(message: Message, state: FSMContext):
     """Переход от шага 11 к шагу 12."""
     await state.set_state(Day1Module1States.step_12)
@@ -459,7 +459,7 @@ async def step_11_to_12(message: Message, state: FSMContext):
     )
 
 # Шаг 12 -> Шаг 13 (Вывод)
-@router.message(Day1Module1States.step_12, F.text.in_(["😊 Немного спокойнее", "Становится спокойнее"]))
+@router.message(Day1Module1States.step_12, F.text == "🌿 Лучше")
 async def step_12_to_13(message: Message, state: FSMContext):
     """Переход от шага 12 к шагу 13."""
     await state.set_state(Day1Module1States.step_13)
@@ -480,7 +480,7 @@ async def step_12_to_13(message: Message, state: FSMContext):
     )
 
 # Шаг 13 -> Шаг 14 (Мотивация)
-@router.message(Day1Module1States.step_13, F.text.in_(["👍 Ясно", "Тревога — просто сигнал"]))
+@router.message(Day1Module1States.step_13, F.text == "⚖️ Тревога — просто сигнал")
 async def complete_day_1_module_1(message: Message, state: FSMContext):
     """Завершает первый модуль."""
     import database as db
