@@ -82,7 +82,7 @@ def get_completion_keyboard() -> ReplyKeyboardMarkup:
     """Клавиатура для завершения модуля."""
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="🙌 До встречи"), KeyboardButton(text="🔄 Давай повторим")],
+            [KeyboardButton(text="🙌 До встречи"), KeyboardButton(text="🔄 Повторить модуль")],
             [KeyboardButton(text="🏠 В основное меню")]
         ],
         resize_keyboard=True
@@ -234,7 +234,7 @@ async def finish_module(message: Message, state: FSMContext):
     await state.clear()
     await complete_module(message)
 
-@router.message(Day1Module2States.completion, F.text == "🔄 Давай повторим")
+@router.message(Day1Module2States.completion, F.text == "🔄 Повторить модуль")
 async def repeat_module(message: Message, state: FSMContext):
     """Повторяет модуль."""
     await state.clear()  # Очищаем состояние перед повтором
