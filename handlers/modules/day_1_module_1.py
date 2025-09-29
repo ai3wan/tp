@@ -21,8 +21,7 @@ class Day1Module1States(StatesGroup):
     step_10 = State()  # Практика дыхания
     step_11 = State()  # Видео практики
     step_12 = State()  # Результат практики
-    step_13 = State()  # Вывод
-    step_14 = State()  # Мотивация
+    step_13 = State()  # Вывод и завершение
 
 def get_step_keyboard(step: int) -> ReplyKeyboardMarkup:
     """Возвращает клавиатуру для конкретного шага диалога."""
@@ -118,13 +117,7 @@ def get_step_keyboard(step: int) -> ReplyKeyboardMarkup:
             ],
             resize_keyboard=True
         ),
-        14: ReplyKeyboardMarkup(
-        keyboard=[
-                [KeyboardButton(text="🌟 Супер"), KeyboardButton(text="🌬 Буду практиковать")],
-            [KeyboardButton(text="🏠 В основное меню")]
-        ],
-        resize_keyboard=True
-    )
+        # Клавиатура для step_14 убрана, так как состояние больше не используется
     }
     return keyboards.get(step, ReplyKeyboardMarkup(keyboard=[], resize_keyboard=True))
 
@@ -488,9 +481,9 @@ async def step_12_to_13(message: Message, state: FSMContext):
 
 # Шаг 13 -> Шаг 14 (Мотивация)
 @router.message(Day1Module1States.step_13, F.text.in_(["👍 Ясно", "Тревога — просто сигнал"]))
-async def step_13_to_14(message: Message, state: FSMContext):
-    """Переход от шага 13 к шагу 14."""
-    await state.set_state(Day1Module1States.step_14)
+async def complete_day_1_module_1(message: Message, state: FSMContext):
+    """Завершает первый модуль."""
+    import database as db
     
     # Создаем сообщение с разворачивающейся цитатой
     quote_text = """Мозг учится через повторение. Когда мы регулярно возвращаемся к дыхательным практикам, создаются новые нейронные связи. Это как протаптывать тропинку в лесу: сначала трудно и непривычно, но потом путь становится лёгким и естественным.
@@ -501,19 +494,22 @@ async def step_13_to_14(message: Message, state: FSMContext):
     
     full_message = f"{main_text}\n\n<blockquote expandable>{quote_text}</blockquote>"
     
+    # Отправляем завершающее сообщение
     await message.answer(
         text=full_message,
-        parse_mode="HTML",
-        reply_markup=get_step_keyboard(14)
+        parse_mode="HTML"
     )
+    
+    # Обновляем закладку пользователя на следующий модуль
+    user_id = message.from_user.id
+    await db.update_user_bookmark(user_id, course_id=1, day=1, module=2)
+    
+    # Показываем главное меню с обновленным прогрессом
+    from handlers.course_flow import show_main_menu
+    await state.clear()
+    await show_main_menu(message, user_id)
 
-# Шаг 14 -> Завершение модуля
-@router.message(Day1Module1States.step_14, F.text.in_(["🌟 Супер", "🌬 Буду практиковать"]))
-async def complete_day_1_module_1(message: Message, state: FSMContext):
-    """Завершает модуль и переходит к следующему."""
-    from handlers.course_flow import complete_module
-    await state.clear()  # Очищаем состояние модуля
-    await complete_module(message)  # Вызываем функцию завершения модуля
+# Функция завершения модуля перенесена в step_13_to_14
 
 # Обработчики для кнопок навигации
 
@@ -531,7 +527,7 @@ async def complete_day_1_module_1(message: Message, state: FSMContext):
 @router.message(Day1Module1States.step_11, F.text == "🏠 В основное меню")
 @router.message(Day1Module1States.step_12, F.text == "🏠 В основное меню")
 @router.message(Day1Module1States.step_13, F.text == "🏠 В основное меню")
-@router.message(Day1Module1States.step_14, F.text == "🏠 В основное меню")
+# Обработчик для step_14 убран, так как состояние больше не используется
 async def back_to_main_menu_from_module(message: Message, state: FSMContext):
     """Возвращает в главное меню."""
     from handlers.course_flow import show_main_menu
