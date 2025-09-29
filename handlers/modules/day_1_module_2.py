@@ -1,7 +1,7 @@
 # handlers/modules/day_1_module_2.py
 
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
+from aiogram.types import Message, CallbackQuery, ReplyKeyboardMarkup, KeyboardButton, FSInputFile
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 import os
@@ -11,7 +11,9 @@ router = Router()
 class Day1Module2States(StatesGroup):
     """Состояния для Дня 1, Модуля 2."""
     introduction = State()
-    gallery = State()
+    story_1 = State()
+    story_2 = State()
+    story_3 = State()
     practice_reminder = State()
     practice_video = State()
     completion = State()
@@ -26,22 +28,31 @@ def get_introduction_keyboard() -> ReplyKeyboardMarkup:
         resize_keyboard=True
     )
 
-def get_gallery_keyboard() -> InlineKeyboardMarkup:
-    """Клавиатура для галереи."""
-    return InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(text="◀️", callback_data="gallery_prev"),
-                InlineKeyboardButton(text="▶️", callback_data="gallery_next")
-            ]
-        ]
-    )
-
-def get_gallery_reply_keyboard() -> ReplyKeyboardMarkup:
-    """Реплей клавиатура после галереи."""
+def get_story_1_keyboard() -> ReplyKeyboardMarkup:
+    """Клавиатура для первой части истории."""
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="🌸 Класс"), KeyboardButton(text="✨ Интересно")],
+            [KeyboardButton(text="🤔 Интересно"), KeyboardButton(text="В основное меню")],
+            [KeyboardButton(text="🏠 В основное меню")]
+        ],
+        resize_keyboard=True
+    )
+
+def get_story_2_keyboard() -> ReplyKeyboardMarkup:
+    """Клавиатура для второй части истории."""
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="😮 Неожиданно"), KeyboardButton(text="В основное меню")],
+            [KeyboardButton(text="🏠 В основное меню")]
+        ],
+        resize_keyboard=True
+    )
+
+def get_story_3_keyboard() -> ReplyKeyboardMarkup:
+    """Клавиатура для третьей части истории."""
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="🌿 Сильно"), KeyboardButton(text="В основное меню")],
             [KeyboardButton(text="🏠 В основное меню")]
         ],
         resize_keyboard=True
@@ -77,22 +88,6 @@ def get_completion_keyboard() -> ReplyKeyboardMarkup:
         resize_keyboard=True
     )
 
-# Данные для галереи
-gallery_data = [
-    {
-        "image": "d1m2_1.jpg",
-        "text": "Будда говорил своим ученикам:\n«Представьте себе человека, в которого попала стрела. Он испытывает сильную боль — и это естественно. Но теперь вообразите, что в того же человека попадает ещё одна стрела в то же самое место. Вторая рана причиняет куда больше страдания, чем первая»."
-    },
-    {
-        "image": "d1m2_2.jpg", 
-        "text": "Ученики удивились: «Учитель, а зачем вторая стрела?»\nБудда ответил: «Первая стрела — это то, что даёт нам сама жизнь: болезнь, усталость, неприятные события, стресс. Это то, что нельзя полностью избежать. Но вторая стрела — это то, что мы пускаем сами. Это наши мысли, тревога, страхи и накручивание. Мы добавляем боль туда, где можно было бы ограничиться только первой стрелой»."
-    },
-    {
-        "image": "d1m2_3.jpg",
-        "text": "Он пояснил: «Обычный человек чувствует обе стрелы. Первая причиняет физическую или ситуационную боль, а вторая рождается в уме — \"Почему это случилось со мной? Что будет дальше? Я не справлюсь!\". Но мудрый человек учится замечать: \"Да, боль есть, стресс есть, но я не обязан усиливать её второй стрелой\". И тогда страдание уменьшается вдвое»."
-    }
-]
-
 @router.message(F.text == "▶️ День 1, Модуль 2")
 async def start_day_1_module_2(message: Message, state: FSMContext):
     """Запускает День 1, Модуль 2."""
@@ -104,58 +99,95 @@ async def start_day_1_module_2(message: Message, state: FSMContext):
     )
 
 @router.message(Day1Module2States.introduction, F.text.in_(["Да, интересно", "Расскажи"]))
-async def show_gallery(message: Message, state: FSMContext):
-    """Показывает галерею с притчей."""
-    await state.set_state(Day1Module2States.gallery)
-    await state.update_data(gallery_index=0)  # Начинаем с первой картинки
+async def show_story_1(message: Message, state: FSMContext):
+    """Показывает первую часть истории."""
+    await state.set_state(Day1Module2States.story_1)
     
-    await show_gallery_image(message, 0)
-
-async def show_gallery_image(message: Message, index: int):
-    """Показывает изображение галереи по индексу."""
+    # Отправляем картинку с первой частью истории
     import os
     from aiogram.types import FSInputFile
     
-    # Получаем данные для текущего изображения
-    gallery_item = gallery_data[index]
-    
-    # Путь к изображению
     image_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
-        "assets", "d1m2", gallery_item["image"]
+        "assets", "d1m2", "d1m2_1.jpg"
     )
-    image_file = FSInputFile(image_path)
     
-    # Отправляем изображение с текстом и навигацией
-    await message.answer_photo(
-        photo=image_file,
-        caption=gallery_item["text"],
-        reply_markup=get_gallery_keyboard()
-    )
-
-@router.callback_query(F.data.startswith("gallery_"))
-async def handle_gallery_navigation(callback: CallbackQuery, state: FSMContext):
-    """Обрабатывает навигацию по галерее."""
-    data = await state.get_data()
-    current_index = data.get("gallery_index", 0)
+    story_text = "Будда говорил своим ученикам:\n«Представьте себе человека, в которого попала стрела. Он испытывает сильную боль — и это естественно. Но теперь вообразите, что в того же человека попадает ещё одна стрела в то же самое место. Вторая рана причиняет куда больше страдания, чем первая»."
     
-    if callback.data == "gallery_prev":
-        new_index = (current_index - 1) % len(gallery_data)
-    elif callback.data == "gallery_next":
-        new_index = (current_index + 1) % len(gallery_data)
+    if os.path.exists(image_path):
+        image_file = FSInputFile(image_path)
+        await message.answer_photo(
+            photo=image_file,
+            caption=story_text,
+            reply_markup=get_story_1_keyboard()
+        )
     else:
-        return
-    
-    await state.update_data(gallery_index=new_index)
-    
-    # Удаляем предыдущее сообщение и отправляем новое
-    await callback.message.delete()
-    await show_gallery_image(callback.message, new_index)
-    await callback.answer()
+        await message.answer(
+            story_text,
+            reply_markup=get_story_1_keyboard()
+        )
 
-@router.message(Day1Module2States.gallery, F.text.in_(["🌸 Класс", "✨ Интересно"]))
-async def continue_after_gallery(message: Message, state: FSMContext):
-    """Продолжает модуль после галереи."""
+@router.message(Day1Module2States.story_1, F.text == "🤔 Интересно")
+async def show_story_2(message: Message, state: FSMContext):
+    """Показывает вторую часть истории."""
+    await state.set_state(Day1Module2States.story_2)
+    
+    # Отправляем картинку со второй частью истории
+    import os
+    from aiogram.types import FSInputFile
+    
+    image_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
+        "assets", "d1m2", "d1m2_2.jpg"
+    )
+    
+    story_text = "Ученики удивились: «Учитель, а зачем вторая стрела?»\nБудда ответил: «Первая стрела — это то, что даёт нам сама жизнь: болезнь, усталость, неприятные события, стресс. Это то, что нельзя полностью избежать. Но вторая стрела — это то, что мы пускаем сами. Это наши мысли, тревога, страхи и накручивание. Мы добавляем боль туда, где можно было бы ограничиться только первой стрелой»."
+    
+    if os.path.exists(image_path):
+        image_file = FSInputFile(image_path)
+        await message.answer_photo(
+            photo=image_file,
+            caption=story_text,
+            reply_markup=get_story_2_keyboard()
+        )
+    else:
+        await message.answer(
+            story_text,
+            reply_markup=get_story_2_keyboard()
+        )
+
+@router.message(Day1Module2States.story_2, F.text == "😮 Неожиданно")
+async def show_story_3(message: Message, state: FSMContext):
+    """Показывает третью часть истории."""
+    await state.set_state(Day1Module2States.story_3)
+    
+    # Отправляем картинку с третьей частью истории
+    import os
+    from aiogram.types import FSInputFile
+    
+    image_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
+        "assets", "d1m2", "d1m2_3.jpg"
+    )
+    
+    story_text = "Он пояснил: «Обычный человек чувствует обе стрелы. Первая причиняет физическую или ситуационную боль, а вторая рождается в уме — \"Почему это случилось со мной? Что будет дальше? Я не справлюсь!\". Но мудрый человек учится замечать: \"Да, боль есть, стресс есть, но я не обязан усиливать её второй стрелой\". И тогда страдание уменьшается вдвое»."
+    
+    if os.path.exists(image_path):
+        image_file = FSInputFile(image_path)
+        await message.answer_photo(
+            photo=image_file,
+            caption=story_text,
+            reply_markup=get_story_3_keyboard()
+        )
+    else:
+        await message.answer(
+            story_text,
+            reply_markup=get_story_3_keyboard()
+        )
+
+@router.message(Day1Module2States.story_3, F.text == "🌿 Сильно")
+async def continue_after_story(message: Message, state: FSMContext):
+    """Продолжает модуль после истории."""
     await state.set_state(Day1Module2States.practice_reminder)
     
     await message.answer(
@@ -211,6 +243,16 @@ async def repeat_module(message: Message, state: FSMContext):
 @router.message(F.text == "🏠 В основное меню")
 async def back_to_main_menu_from_module(message: Message, state: FSMContext):
     """Возвращает в главное меню."""
+    from handlers.course_flow import show_main_menu
+    await state.clear()
+    await show_main_menu(message, message.from_user.id)
+
+# Обработчики для кнопок "В основное меню" в истории
+@router.message(Day1Module2States.story_1, F.text == "В основное меню")
+@router.message(Day1Module2States.story_2, F.text == "В основное меню")
+@router.message(Day1Module2States.story_3, F.text == "В основное меню")
+async def back_to_main_menu_from_story(message: Message, state: FSMContext):
+    """Возвращает в главное меню из истории."""
     from handlers.course_flow import show_main_menu
     await state.clear()
     await show_main_menu(message, message.from_user.id)
