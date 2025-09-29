@@ -232,9 +232,9 @@ async def finish_module(message: Message, state: FSMContext):
     """Завершает модуль, обновляет прогресс и показывает главное меню."""
     import database as db
     
-    # Обновляем прогресс пользователя на следующий модуль
+    # Обновляем закладку пользователя на следующий модуль
     user_id = message.from_user.id
-    await db.update_user_progress(user_id, day=1, module=3)
+    await db.update_user_bookmark(user_id, course_id=1, day=1, module=3)
     
     # Показываем главное меню с обновленным прогрессом
     from handlers.course_flow import show_main_menu
