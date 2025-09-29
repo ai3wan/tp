@@ -237,6 +237,7 @@ async def finish_module(message: Message, state: FSMContext):
 @router.message(Day1Module2States.completion, F.text == "🔄 Давай повторим")
 async def repeat_module(message: Message, state: FSMContext):
     """Повторяет модуль."""
+    await state.clear()  # Очищаем состояние перед повтором
     await start_day_1_module_2(message, state)
 
 # Обработчики для кнопок навигации
