@@ -229,10 +229,10 @@ async def complete_module(message: Message, state: FSMContext):
 
 @router.message(Day1Module2States.completion, F.text == "🙌 До встречи")
 async def finish_module(message: Message, state: FSMContext):
-    """Завершает модуль и переходит к следующему."""
-    from handlers.course_flow import complete_module
+    """Завершает модуль и показывает главное меню."""
+    from handlers.course_flow import show_main_menu
     await state.clear()
-    await complete_module(message)
+    await show_main_menu(message, message.from_user.id)
 
 @router.message(Day1Module2States.completion, F.text == "🔄 Повторить модуль")
 async def repeat_module(message: Message, state: FSMContext):
