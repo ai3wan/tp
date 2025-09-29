@@ -516,11 +516,6 @@ async def complete_day_1_module_1(message: Message, state: FSMContext):
     await complete_module(message)  # Вызываем функцию завершения модуля
 
 # Обработчики для кнопок навигации
-@router.message(Day1Module1States.step_14, F.text == "🔄 Давай повторим")
-async def repeat_day_1_module_1(message: Message, state: FSMContext):
-    """Повторяет текущий модуль."""
-    await state.clear()  # Очищаем состояние перед повтором
-    await start_day_1_module_1(message, state)
 
 # Обработчики для кнопки "В основное меню" для каждого состояния первого модуля
 @router.message(Day1Module1States.step_1, F.text == "🏠 В основное меню")
