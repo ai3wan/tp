@@ -516,12 +516,27 @@ async def complete_day_1_module_1(message: Message, state: FSMContext):
     await complete_module(message)  # Вызываем функцию завершения модуля
 
 # Обработчики для кнопок навигации
-@router.message(F.text == "🔄 Давай повторим")
+@router.message(Day1Module1States.step_14, F.text == "🔄 Давай повторим")
 async def repeat_day_1_module_1(message: Message, state: FSMContext):
     """Повторяет текущий модуль."""
+    await state.clear()  # Очищаем состояние перед повтором
     await start_day_1_module_1(message, state)
 
-@router.message(F.text == "🏠 В основное меню")
+# Обработчики для кнопки "В основное меню" для каждого состояния первого модуля
+@router.message(Day1Module1States.step_1, F.text == "🏠 В основное меню")
+@router.message(Day1Module1States.step_2, F.text == "🏠 В основное меню")
+@router.message(Day1Module1States.step_3, F.text == "🏠 В основное меню")
+@router.message(Day1Module1States.step_4, F.text == "🏠 В основное меню")
+@router.message(Day1Module1States.step_5, F.text == "🏠 В основное меню")
+@router.message(Day1Module1States.step_6, F.text == "🏠 В основное меню")
+@router.message(Day1Module1States.step_7, F.text == "🏠 В основное меню")
+@router.message(Day1Module1States.step_8, F.text == "🏠 В основное меню")
+@router.message(Day1Module1States.step_9, F.text == "🏠 В основное меню")
+@router.message(Day1Module1States.step_10, F.text == "🏠 В основное меню")
+@router.message(Day1Module1States.step_11, F.text == "🏠 В основное меню")
+@router.message(Day1Module1States.step_12, F.text == "🏠 В основное меню")
+@router.message(Day1Module1States.step_13, F.text == "🏠 В основное меню")
+@router.message(Day1Module1States.step_14, F.text == "🏠 В основное меню")
 async def back_to_main_menu_from_module(message: Message, state: FSMContext):
     """Возвращает в главное меню."""
     from handlers.course_flow import show_main_menu
