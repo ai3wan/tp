@@ -229,10 +229,17 @@ async def complete_module(message: Message, state: FSMContext):
 
 @router.message(Day1Module2States.completion, F.text == "🙌 До встречи")
 async def finish_module(message: Message, state: FSMContext):
-    """Завершает модуль и показывает главное меню."""
+    """Завершает модуль, обновляет прогресс и показывает главное меню."""
+    import database as db
+    
+    # Обновляем прогресс пользователя на следующий модуль
+    user_id = message.from_user.id
+    await db.update_user_progress(user_id, day=1, module=3)
+    
+    # Показываем главное меню с обновленным прогрессом
     from handlers.course_flow import show_main_menu
     await state.clear()
-    await show_main_menu(message, message.from_user.id)
+    await show_main_menu(message, user_id)
 
 @router.message(Day1Module2States.completion, F.text == "🔄 Повторить модуль")
 async def repeat_module(message: Message, state: FSMContext):
