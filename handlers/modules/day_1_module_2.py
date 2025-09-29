@@ -16,7 +16,6 @@ class Day1Module2States(StatesGroup):
     story_3 = State()
     practice_reminder = State()
     practice_video = State()
-    completion = State()
 
 def get_introduction_keyboard() -> ReplyKeyboardMarkup:
     """Клавиатура для введения."""
@@ -78,15 +77,7 @@ def get_practice_video_keyboard() -> ReplyKeyboardMarkup:
         resize_keyboard=True
     )
 
-def get_completion_keyboard() -> ReplyKeyboardMarkup:
-    """Клавиатура для завершения модуля."""
-    return ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text="🙌 До встречи")],
-            [KeyboardButton(text="🏠 В основное меню")]
-        ],
-        resize_keyboard=True
-    )
+# Функция get_completion_keyboard больше не нужна
 
 @router.message(F.text == "▶️ День 1, Модуль 2")
 async def start_day_1_module_2(message: Message, state: FSMContext):
@@ -220,17 +211,12 @@ async def show_practice_video(message: Message, state: FSMContext):
 @router.message(Day1Module2States.practice_video, F.text.in_(["🌿 Уже лучше", "😌 Спокойнее"]))
 async def complete_module(message: Message, state: FSMContext):
     """Завершает модуль."""
-    await state.set_state(Day1Module2States.completion)
-    
-    await message.answer(
-        "📌 До встречи в следующем модуле!\nТам мы вспомним, что сегодня узнали, ещё раз повторим дыхательную практику 🌬️ и послушаем короткую медитацию для расслабления 🎧✨",
-        reply_markup=get_completion_keyboard()
-    )
-
-@router.message(Day1Module2States.completion, F.text == "🙌 До встречи")
-async def finish_module(message: Message, state: FSMContext):
-    """Завершает модуль, обновляет прогресс и показывает главное меню."""
     import database as db
+    
+    # Отправляем завершающее сообщение
+    await message.answer(
+        "📌 До встречи в следующем модуле!\nТам мы вспомним, что сегодня узнали, ещё раз повторим дыхательную практику 🌬️ и послушаем короткую медитацию для расслабления 🎧✨"
+    )
     
     # Обновляем закладку пользователя на следующий модуль
     user_id = message.from_user.id
@@ -240,6 +226,8 @@ async def finish_module(message: Message, state: FSMContext):
     from handlers.course_flow import show_main_menu
     await state.clear()
     await show_main_menu(message, user_id)
+
+# Функция finish_module больше не нужна - главное меню показывается автоматически
 
 # Кнопка повтора модуля убрана
 
