@@ -21,7 +21,7 @@ def get_introduction_keyboard() -> ReplyKeyboardMarkup:
     """Клавиатура для введения."""
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="Да, интересно"), KeyboardButton(text="Расскажи")],
+            [KeyboardButton(text="📖 Расскажи")],
             [KeyboardButton(text="🏠 В основное меню")]
         ],
         resize_keyboard=True
@@ -31,7 +31,7 @@ def get_story_1_keyboard() -> ReplyKeyboardMarkup:
     """Клавиатура для первой части истории."""
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="🤔 Интересно"), KeyboardButton(text="В основное меню")],
+            [KeyboardButton(text="🤔 Интересно")],
             [KeyboardButton(text="🏠 В основное меню")]
         ],
         resize_keyboard=True
@@ -41,7 +41,7 @@ def get_story_2_keyboard() -> ReplyKeyboardMarkup:
     """Клавиатура для второй части истории."""
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="😮 Неожиданно"), KeyboardButton(text="В основное меню")],
+            [KeyboardButton(text="😮 Неожиданно")],
             [KeyboardButton(text="🏠 В основное меню")]
         ],
         resize_keyboard=True
@@ -51,7 +51,7 @@ def get_story_3_keyboard() -> ReplyKeyboardMarkup:
     """Клавиатура для третьей части истории."""
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="🌿 Сильно"), KeyboardButton(text="В основное меню")],
+            [KeyboardButton(text="🌿 Сильно")],
             [KeyboardButton(text="🏠 В основное меню")]
         ],
         resize_keyboard=True
@@ -61,7 +61,7 @@ def get_practice_reminder_keyboard() -> ReplyKeyboardMarkup:
     """Клавиатура для напоминания о практике."""
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="⏩ Вперёд"), KeyboardButton(text="🙌 Давай")],
+            [KeyboardButton(text="🙌 Давай")],
             [KeyboardButton(text="🏠 В основное меню")]
         ],
         resize_keyboard=True
@@ -71,7 +71,7 @@ def get_practice_video_keyboard() -> ReplyKeyboardMarkup:
     """Клавиатура для видео практики."""
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="🌿 Уже лучше"), KeyboardButton(text="😌 Спокойнее")],
+            [KeyboardButton(text="🌿 Уже лучше")],
             [KeyboardButton(text="🏠 В основное меню")]
         ],
         resize_keyboard=True
@@ -89,7 +89,7 @@ async def start_day_1_module_2(message: Message, state: FSMContext):
         reply_markup=get_introduction_keyboard()
     )
 
-@router.message(Day1Module2States.introduction, F.text.in_(["Да, интересно", "Расскажи"]))
+@router.message(Day1Module2States.introduction, F.text == "📖 Расскажи")
 async def show_story_1(message: Message, state: FSMContext):
     """Показывает первую часть истории."""
     await state.set_state(Day1Module2States.story_1)
@@ -186,7 +186,7 @@ async def continue_after_story(message: Message, state: FSMContext):
         reply_markup=get_practice_reminder_keyboard()
     )
 
-@router.message(Day1Module2States.practice_reminder, F.text.in_(["⏩ Вперёд", "🙌 Давай"]))
+@router.message(Day1Module2States.practice_reminder, F.text == "🙌 Давай")
 async def show_practice_video(message: Message, state: FSMContext):
     """Показывает видео практики."""
     await state.set_state(Day1Module2States.practice_video)
@@ -208,7 +208,7 @@ async def show_practice_video(message: Message, state: FSMContext):
         reply_markup=get_practice_video_keyboard()
     )
 
-@router.message(Day1Module2States.practice_video, F.text.in_(["🌿 Уже лучше", "😌 Спокойнее"]))
+@router.message(Day1Module2States.practice_video, F.text == "🌿 Уже лучше")
 async def complete_module(message: Message, state: FSMContext):
     """Завершает модуль."""
     import database as db
