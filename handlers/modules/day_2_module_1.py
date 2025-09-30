@@ -20,7 +20,6 @@ class Day2Module1States(StatesGroup):
     step_9 = State()  # Общее состояние
     step_10 = State()  # Доступность практики
     step_11 = State()  # Цель практики
-    step_12 = State()  # Завершение модуля
 
 def get_step_keyboard(step: int) -> ReplyKeyboardMarkup:
     """Возвращает клавиатуру для конкретного шага диалога."""
@@ -98,13 +97,6 @@ def get_step_keyboard(step: int) -> ReplyKeyboardMarkup:
         11: ReplyKeyboardMarkup(
             keyboard=[
                 [KeyboardButton(text="💪 Тренирую навык")],
-                [KeyboardButton(text="🏠 В основное меню")]
-            ],
-            resize_keyboard=True
-        ),
-        12: ReplyKeyboardMarkup(
-            keyboard=[
-                [KeyboardButton(text="✅ Освоил второй инструмент")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
@@ -286,27 +278,21 @@ async def step_10_to_11(message: Message, state: FSMContext):
         reply_markup=get_step_keyboard(11)
     )
 
-# Шаг 11 -> Шаг 12
+# Шаг 11 -> Завершение модуля
 @router.message(Day2Module1States.step_11, F.text == "💪 Тренирую навык")
-async def step_11_to_12(message: Message, state: FSMContext):
-    """Переход от шага 11 к шагу 12."""
-    await state.set_state(Day2Module1States.step_12)
+async def complete_day_2_module_1(message: Message, state: FSMContext):
+    """Завершает второй день, первый модуль."""
+    import database as db
     
+    # Отправляем завершающее сообщение
     await message.answer(
         "Сегодня стало понятно: тревога живёт не только в голове, но и в теле.\n"
         "И появился второй инструмент — прогрессивная мышечная релаксация.\n\n"
         "<blockquote expandable>Теперь есть два приёма: дыхание и работа с мышцами. Это как маленькая «аптечка спокойствия».\n\n"
         "Лучше всего работает сочетание: дыхание замедляет ритм, а релаксация снимает телесные зажимы. Вместе они дают больше эффекта.\n\n"
         "Каждый такой шаг — вклад в привычку спокойствия. Формируется личный набор техник, которыми можно пользоваться в любых обстоятельствах.</blockquote>",
-        parse_mode="HTML",
-        reply_markup=get_step_keyboard(12)
+        parse_mode="HTML"
     )
-
-# Шаг 12 -> Завершение модуля
-@router.message(Day2Module1States.step_12, F.text == "✅ Освоил второй инструмент")
-async def complete_day_2_module_1(message: Message, state: FSMContext):
-    """Завершает второй день, первый модуль."""
-    import database as db
     
     # Обновляем закладку пользователя на следующий модуль
     user_id = message.from_user.id
@@ -329,7 +315,6 @@ async def complete_day_2_module_1(message: Message, state: FSMContext):
 @router.message(Day2Module1States.step_9, F.text == "🏠 В основное меню")
 @router.message(Day2Module1States.step_10, F.text == "🏠 В основное меню")
 @router.message(Day2Module1States.step_11, F.text == "🏠 В основное меню")
-@router.message(Day2Module1States.step_12, F.text == "🏠 В основное меню")
 async def back_to_main_menu_from_module(message: Message, state: FSMContext):
     """Возвращает в главное меню."""
     from handlers.course_flow import show_main_menu
