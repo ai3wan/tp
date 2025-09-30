@@ -130,7 +130,7 @@ async def start_day_1_module_1(message: Message, state: FSMContext):
     import os
     from aiogram.types import FSInputFile
     
-    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_1.png")
+    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_1.jpg")
     image_file = FSInputFile(image_path)
     
     # Создаем сообщение с разворачивающейся цитатой
@@ -159,7 +159,7 @@ async def step_1_to_2(message: Message, state: FSMContext):
     import os
     from aiogram.types import FSInputFile
     
-    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_2.png")
+    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_2.jpg")
     image_file = FSInputFile(image_path)
     
     # Создаем сообщение с разворачивающейся цитатой
@@ -188,7 +188,7 @@ async def step_2_to_3(message: Message, state: FSMContext):
     import os
     from aiogram.types import FSInputFile
     
-    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_3.png")
+    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_3.jpg")
     image_file = FSInputFile(image_path)
     
     # Создаем сообщение с разворачивающейся цитатой
@@ -217,7 +217,7 @@ async def step_3_to_4(message: Message, state: FSMContext):
     import os
     from aiogram.types import FSInputFile
     
-    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_4.png")
+    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_4.jpg")
     image_file = FSInputFile(image_path)
     
     # Создаем сообщение с разворачивающейся цитатой
@@ -246,7 +246,7 @@ async def step_4_to_5(message: Message, state: FSMContext):
     import os
     from aiogram.types import FSInputFile
     
-    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_5.png")
+    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_5.jpg")
     image_file = FSInputFile(image_path)
     
     # Создаем сообщение с разворачивающейся цитатой
@@ -275,7 +275,7 @@ async def step_5_to_6(message: Message, state: FSMContext):
     import os
     from aiogram.types import FSInputFile
     
-    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_6.png")
+    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_6.jpg")
     image_file = FSInputFile(image_path)
     
     # Создаем сообщение с разворачивающейся цитатой
@@ -304,7 +304,7 @@ async def step_6_to_7(message: Message, state: FSMContext):
     import os
     from aiogram.types import FSInputFile
     
-    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_7.png")
+    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_7.jpg")
     image_file = FSInputFile(image_path)
     
     # Создаем сообщение с разворачивающейся цитатой
@@ -333,7 +333,7 @@ async def step_7_to_8(message: Message, state: FSMContext):
     import os
     from aiogram.types import FSInputFile
     
-    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_8.png")
+    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_8.jpg")
     image_file = FSInputFile(image_path)
     
     # Создаем сообщение с разворачивающейся цитатой
@@ -362,7 +362,7 @@ async def step_8_to_9(message: Message, state: FSMContext):
     import os
     from aiogram.types import FSInputFile
     
-    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_9.png")
+    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_9.jpg")
     image_file = FSInputFile(image_path)
     
     # Создаем сообщение с разворачивающейся цитатой
@@ -391,7 +391,7 @@ async def step_9_to_10(message: Message, state: FSMContext):
     import os
     from aiogram.types import FSInputFile
     
-    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_10.png")
+    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_10.jpg")
     image_file = FSInputFile(image_path)
     
     # Создаем сообщение с разворачивающейся цитатой
@@ -439,7 +439,7 @@ async def step_11_to_12(message: Message, state: FSMContext):
     import os
     from aiogram.types import FSInputFile
     
-    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_11.png")
+    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_11.jpg")
     image_file = FSInputFile(image_path)
     
     # Создаем сообщение с разворачивающейся цитатой
