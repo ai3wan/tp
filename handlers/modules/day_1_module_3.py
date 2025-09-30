@@ -120,21 +120,10 @@ async def step_1_to_2(message: Message, state: FSMContext):
     """Переход от шага 1 к шагу 2."""
     await state.set_state(Day1Module3States.step_2)
     
-    # Отправляем картинку с сообщением (если файл существует)
-    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m3", "d1m3_2.jpg")
-    
-    if os.path.exists(image_path):
-        image_file = FSInputFile(image_path)
-        await message.answer_photo(
-            photo=image_file,
-            caption="Знаешь, когда мы просто проживаем день — тревога часто пролетает мимо сознания. Но если остановиться и вспомнить её моменты, мы начинаем лучше понимать, как она работает.",
-            reply_markup=get_step_keyboard(2)
-        )
-    else:
-        await message.answer(
-            "Знаешь, когда мы просто проживаем день — тревога часто пролетает мимо сознания. Но если остановиться и вспомнить её моменты, мы начинаем лучше понимать, как она работает.",
-            reply_markup=get_step_keyboard(2)
-        )
+    await message.answer(
+        "Знаешь, когда мы просто проживаем день — тревога часто пролетает мимо сознания. Но если остановиться и вспомнить её моменты, мы начинаем лучше понимать, как она работает.",
+        reply_markup=get_step_keyboard(2)
+    )
 
 # Шаг 2 -> Шаг 3
 @router.message(Day1Module3States.step_2, F.text == "💡 Понимать тревогу важно")
@@ -143,7 +132,7 @@ async def step_2_to_3(message: Message, state: FSMContext):
     await state.set_state(Day1Module3States.step_3)
     
     # Отправляем картинку с сообщением (если файл существует)
-    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m3", "d1m3_3.jpg")
+    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m3", "d1m3_2.jpg")
     
     if os.path.exists(image_path):
         image_file = FSInputFile(image_path)
@@ -164,10 +153,21 @@ async def step_3_to_4(message: Message, state: FSMContext):
     """Переход от шага 3 к шагу 4."""
     await state.set_state(Day1Module3States.step_4)
     
-    await message.answer(
-        "Каждый вечер мы будем уделять пару минут рефлексии ✍️ Это как маленькое зеркало — ты учишься смотреть, где именно появлялась тревога за день.",
-        reply_markup=get_step_keyboard(4)
-    )
+    # Отправляем картинку с сообщением (если файл существует)
+    image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m3", "d1m3_3.jpg")
+    
+    if os.path.exists(image_path):
+        image_file = FSInputFile(image_path)
+        await message.answer_photo(
+            photo=image_file,
+            caption="Каждый вечер мы будем уделять пару минут рефлексии ✍️ Это как маленькое зеркало — ты учишься смотреть, где именно появлялась тревога за день.",
+            reply_markup=get_step_keyboard(4)
+        )
+    else:
+        await message.answer(
+            "Каждый вечер мы будем уделять пару минут рефлексии ✍️ Это как маленькое зеркало — ты учишься смотреть, где именно появлялась тревога за день.",
+            reply_markup=get_step_keyboard(4)
+        )
 
 # Шаг 4 -> Шаг 5
 @router.message(Day1Module3States.step_4, F.text == "🪞 Зеркало для тревоги")
