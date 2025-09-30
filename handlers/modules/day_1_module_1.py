@@ -126,12 +126,11 @@ async def start_day_1_module_1(message: Message, state: FSMContext):
     """Запускает День 1, Модуль 1 - интерактивный диалог."""
     await state.set_state(Day1Module1States.step_1)
     
-    # Отправляем картинку с текстом
+    # Отправляем картинку с текстом (если файл существует)
     import os
     from aiogram.types import FSInputFile
     
     image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d1m1_1.jpg")
-    image_file = FSInputFile(image_path)
     
     # Создаем сообщение с разворачивающейся цитатой
     quote_text = """Тревога — это как встроенный датчик дыма в доме. Он реагирует, когда что-то может пойти не так. Иногда сигнал слишком громкий или срабатывает не вовремя, но сам факт того, что он есть, — это благо. Представь себе дом без сигнализации — было бы опасно.
@@ -142,12 +141,20 @@ async def start_day_1_module_1(message: Message, state: FSMContext):
     
     full_caption = f"{main_text}\n\n<blockquote expandable>{quote_text}</blockquote>"
     
-    await message.answer_photo(
-        photo=image_file,
-        caption=full_caption,
-        parse_mode="HTML",
-        reply_markup=get_step_keyboard(1)
-    )
+    if os.path.exists(image_path):
+        image_file = FSInputFile(image_path)
+        await message.answer_photo(
+            photo=image_file,
+            caption=full_caption,
+            parse_mode="HTML",
+            reply_markup=get_step_keyboard(1)
+        )
+    else:
+        await message.answer(
+            text=full_caption,
+            parse_mode="HTML",
+            reply_markup=get_step_keyboard(1)
+        )
 
 # Шаг 1 -> Шаг 2
 @router.message(Day1Module1States.step_1, F.text == "👍 Да, поехали")
