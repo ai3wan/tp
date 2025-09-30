@@ -1,9 +1,10 @@
 # handlers/modules/day_1_module_3.py
 
 from aiogram import Router, F
-from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, FSInputFile
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
+import os
 
 router = Router()
 
@@ -101,10 +102,15 @@ async def start_day_1_module_3(message: Message, state: FSMContext):
     """Запускает третий модуль первого дня."""
     await state.set_state(Day1Module3States.step_1)
     
-    await message.answer(
-        "✨ Прежде чем начать вечерний модуль, давай немного настроимся.\n"
-        "🌬️ Вернёмся к нашей практике дыхания: вдох на 4 секунды ⏱️, выдох на 6.\n"
-        "Подыши так пару минут — и тело станет спокойнее 😌",
+    # Отправляем видео с дыхательной практикой
+    video_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "practice_1.mp4")
+    video_file = FSInputFile(video_path)
+    
+    await message.answer_video(
+        video=video_file,
+        caption="✨ Прежде чем начать вечерний модуль, давай немного настроимся.\n"
+                "🌬️ Вернёмся к нашей практике дыхания: вдох на 4 секунды ⏱️, выдох на 6.\n"
+                "Подыши так пару минут — и тело станет спокойнее 😌",
         reply_markup=get_step_keyboard(1)
     )
 
