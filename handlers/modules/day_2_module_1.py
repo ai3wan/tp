@@ -54,7 +54,7 @@ def get_step_keyboard(step: int) -> ReplyKeyboardMarkup:
         ),
         5: ReplyKeyboardMarkup(
             keyboard=[
-                [KeyboardButton(text="🧘 Расслабление через контраст")],
+                [KeyboardButton(text="🙌 Давай попробуем")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
@@ -183,7 +183,7 @@ async def step_4_to_5(message: Message, state: FSMContext):
     )
 
 # Шаг 5 -> Шаг 6
-@router.message(Day2Module1States.step_5, F.text == "🧘 Расслабление через контраст")
+@router.message(Day2Module1States.step_5, F.text == "🙌 Давай попробуем")
 async def step_5_to_6(message: Message, state: FSMContext):
     """Переход от шага 5 к шагу 6."""
     await state.set_state(Day2Module1States.step_6)
