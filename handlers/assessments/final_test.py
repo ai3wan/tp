@@ -110,66 +110,66 @@ async def abort_final_test(message: Message, state: FSMContext):
 async def start_final_questions(message: Message, state: FSMContext):
     await state.set_state(FinalTest.q1)
     await message.answer(
-        "1. Как часто у тебя бывают тревожные мысли, которые сложно остановить? 🤔",
+        "Как часто у тебя бывают тревожные мысли, которые сложно остановить? 🤔",
         reply_markup=q1_kb
     )
 
 # Обработчики вопросов
 @router.message(FinalTest.q1)
 async def final_q1(message: Message, state: FSMContext):
-    await process_answer(message, state, FinalTest.q2, "2. Как ты спишь? 😴", q2_kb, q1_kb)
+    await process_answer(message, state, FinalTest.q2, "Как ты спишь? 😴", q2_kb, q1_kb)
 
 @router.message(FinalTest.q2)
 async def final_q2(message: Message, state: FSMContext):
-    await process_answer(message, state, FinalTest.q3, "3. Бывает ли у тебя напряжение в теле (плечи, шея, челюсти) без физической причины? 💆", q3_kb, q2_kb)
+    await process_answer(message, state, FinalTest.q3, "Бывает ли у тебя напряжение в теле (плечи, шея, челюсти) без физической причины? 💆", q3_kb, q2_kb)
 
 @router.message(FinalTest.q3)
 async def final_q3(message: Message, state: FSMContext):
-    await process_answer(message, state, FinalTest.q4, "4. Как часто у тебя возникают тревожные мысли о будущем? 🔮", q4_kb, q3_kb)
+    await process_answer(message, state, FinalTest.q4, "Как часто у тебя возникают тревожные мысли о будущем? 🔮", q4_kb, q3_kb)
 
 @router.message(FinalTest.q4)
 async def final_q4(message: Message, state: FSMContext):
-    await process_answer(message, state, FinalTest.q5, "5. Замечаешь ли ты учащённое сердцебиение, дрожь или потливость, когда тревожно? ❤️‍🔥", q5_kb, q4_kb)
+    await process_answer(message, state, FinalTest.q5, "Замечаешь ли ты учащённое сердцебиение, дрожь или потливость, когда тревожно? ❤️‍🔥", q5_kb, q4_kb)
 
 @router.message(FinalTest.q5)
 async def final_q5(message: Message, state: FSMContext):
-    await process_answer(message, state, FinalTest.q6, "6. Как часто ты испытываешь раздражительность или вспышки гнева без серьёзной причины? 😠", q6_kb, q5_kb)
+    await process_answer(message, state, FinalTest.q6, "Как часто ты испытываешь раздражительность или вспышки гнева без серьёзной причины? 😠", q6_kb, q5_kb)
 
 @router.message(FinalTest.q6)
 async def final_q6(message: Message, state: FSMContext):
-    await process_answer(message, state, FinalTest.q7, "7. Можешь ли ты спокойно сосредоточиться на задаче, когда вокруг стресс? 🎯", q7_kb, q6_kb)
+    await process_answer(message, state, FinalTest.q7, "Можешь ли ты спокойно сосредоточиться на задаче, когда вокруг стресс? 🎯", q7_kb, q6_kb)
 
 @router.message(FinalTest.q7)
 async def final_q7(message: Message, state: FSMContext):
-    await process_answer(message, state, FinalTest.q8, "8. Как ты реагируешь на неожиданные трудности? 🚧", q8_kb, q7_kb)
+    await process_answer(message, state, FinalTest.q8, "Как ты реагируешь на неожиданные трудности? 🚧", q8_kb, q7_kb)
 
 @router.message(FinalTest.q8)
 async def final_q8(message: Message, state: FSMContext):
-    await process_answer(message, state, FinalTest.q9, "9. Часто ли ты избегаешь ситуаций, которые могут вызвать стресс или волнение? 🛑", q9_kb, q8_kb)
+    await process_answer(message, state, FinalTest.q9, "Часто ли ты избегаешь ситуаций, которые могут вызвать стресс или волнение? 🛑", q9_kb, q8_kb)
 
 @router.message(FinalTest.q9)
 async def final_q9(message: Message, state: FSMContext):
-    await process_answer(message, state, FinalTest.q10, "10. Чувствуешь ли ты, что тревога мешает тебе отдыхать и наслаждаться жизнью? 🌴", q10_kb, q9_kb)
+    await process_answer(message, state, FinalTest.q10, "Чувствуешь ли ты, что тревога мешает тебе отдыхать и наслаждаться жизнью? 🌴", q10_kb, q9_kb)
 
 @router.message(FinalTest.q10)
 async def final_q10(message: Message, state: FSMContext):
-    await process_answer(message, state, FinalTest.q11, "11. Замечаешь ли ты, что тревога влияет на твоё здоровье (головные боли, желудок, усталость)? 💊", q11_kb, q10_kb)
+    await process_answer(message, state, FinalTest.q11, "Замечаешь ли ты, что тревога влияет на твоё здоровье (головные боли, желудок, усталость)? 💊", q11_kb, q10_kb)
 
 @router.message(FinalTest.q11)
 async def final_q11(message: Message, state: FSMContext):
-    await process_answer(message, state, FinalTest.q12, "12. Насколько ты уверен(а) в своих силах справляться с трудностями? 💪", q12_kb, q11_kb)
+    await process_answer(message, state, FinalTest.q12, "Насколько ты уверен(а) в своих силах справляться с трудностями? 💪", q12_kb, q11_kb)
 
 @router.message(FinalTest.q12)
 async def final_q12(message: Message, state: FSMContext):
-    await process_answer(message, state, FinalTest.q13, "13. Как часто у тебя бывают трудности с дыханием или ощущение, что \"не хватает воздуха\" при тревоге? 🌬", q13_kb, q12_kb)
+    await process_answer(message, state, FinalTest.q13, "Как часто у тебя бывают трудности с дыханием или ощущение, что \"не хватает воздуха\" при тревоге? 🌬", q13_kb, q12_kb)
 
 @router.message(FinalTest.q13)
 async def final_q13(message: Message, state: FSMContext):
-    await process_answer(message, state, FinalTest.q14, "14. Как часто тебе нужна поддержка других, чтобы успокоиться? 🤝", q14_kb, q13_kb)
+    await process_answer(message, state, FinalTest.q14, "Как часто тебе нужна поддержка других, чтобы успокоиться? 🤝", q14_kb, q13_kb)
 
 @router.message(FinalTest.q14)
 async def final_q14(message: Message, state: FSMContext):
-    await process_answer(message, state, FinalTest.q15, "15. Оцени свою общую тревожность за последнюю неделю по шкале от 0 до 10, где 0 — совсем не тревожно, а 10 — очень тревожно.", None, q14_kb)
+    await process_answer(message, state, FinalTest.q15, "Оцени свою общую тревожность за последнюю неделю по шкале от 0 до 10, где 0 — совсем не тревожно, а 10 — очень тревожно.", None, q14_kb)
     await state.set_state(FinalTest.q15)
 
 # Обработчик завершения финального теста
@@ -227,3 +227,4 @@ async def invalid_final_q15_answer(message: Message):
         "❌ Пожалуйста, введите только цифру от 0 до 10 для оценки вашей тревожности.\n\n"
         "Например: 5"
     )
+
