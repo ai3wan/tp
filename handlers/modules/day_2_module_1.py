@@ -145,6 +145,9 @@ async def step_1_to_2(message: Message, state: FSMContext):
     await state.set_state(Day2Module1States.step_2)
     
     # Отправляем изображение с текстом (если файл существует)
+    import os
+    from aiogram.types import FSInputFile
+    
     image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d2m1", "d2m1_2.jpg")
     
     if os.path.exists(image_path):
@@ -177,6 +180,9 @@ async def step_2_to_3(message: Message, state: FSMContext):
     await state.set_state(Day2Module1States.step_3)
     
     # Отправляем изображение с текстом (если файл существует)
+    import os
+    from aiogram.types import FSInputFile
+    
     image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d2m1", "d2m1_3.jpg")
     
     if os.path.exists(image_path):
@@ -209,6 +215,9 @@ async def step_3_to_4(message: Message, state: FSMContext):
     await state.set_state(Day2Module1States.step_4)
     
     # Отправляем изображение с текстом (если файл существует)
+    import os
+    from aiogram.types import FSInputFile
+    
     image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d2m1", "d2m1_4.jpg")
     
     if os.path.exists(image_path):
@@ -341,6 +350,9 @@ async def step_9_to_10(message: Message, state: FSMContext):
     await state.set_state(Day2Module1States.step_10)
     
     # Отправляем изображение с текстом (если файл существует)
+    import os
+    from aiogram.types import FSInputFile
+    
     image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d2m1", "d2m1_7.jpg")
     
     if os.path.exists(image_path):
@@ -373,6 +385,9 @@ async def step_10_to_11(message: Message, state: FSMContext):
     await state.set_state(Day2Module1States.step_11)
     
     # Отправляем изображение с текстом (если файл существует)
+    import os
+    from aiogram.types import FSInputFile
+    
     image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d2m1", "d2m1_8.jpg")
     
     if os.path.exists(image_path):
@@ -405,6 +420,9 @@ async def complete_day_2_module_1(message: Message, state: FSMContext):
     import database as db
     
     # Отправляем завершающее сообщение с изображением (если файл существует)
+    import os
+    from aiogram.types import FSInputFile
+    
     image_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d2m1", "d2m1_9.jpg")
     
     if os.path.exists(image_path):
