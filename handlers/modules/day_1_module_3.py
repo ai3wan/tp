@@ -298,6 +298,20 @@ async def complete_day_1_module_3(message: Message, state: FSMContext):
             "Просто устройся поудобнее, закрой глаза и следи за дыханием."
         )
     
+    # Отправляем медитацию (если файл существует)
+    audio_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "meditations", "meditation_1.mp3")
+    
+    if os.path.exists(audio_path):
+        audio_file = FSInputFile(audio_path)
+        await message.answer_audio(
+            audio=audio_file,
+            caption="🎧 Медитация «Сканирование дыхания»",
+            title="Сканирование дыхания",
+            performer="Курс по управлению тревогой"
+        )
+    else:
+        await message.answer("🎧 Медитация временно недоступна")
+    
     # Обновляем закладку пользователя на следующий день
     user_id = message.from_user.id
     await db.update_user_bookmark(user_id, course_id=1, day=2, module=1)
