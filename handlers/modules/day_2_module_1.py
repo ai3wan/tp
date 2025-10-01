@@ -312,7 +312,7 @@ async def step_6_to_7(message: Message, state: FSMContext):
     await state.set_state(Day2Module1States.step_7)
     
     await message.answer(
-        "Отлично! Теперь переходим к плечам.",
+        "«Следующая остановка — плечи. Здесь тревога любит прятаться.»",
         reply_markup=get_step_keyboard(7)
     )
 
@@ -323,7 +323,7 @@ async def step_7_to_8(message: Message, state: FSMContext):
     await state.set_state(Day2Module1States.step_8)
     
     await message.answer(
-        "Отлично! Теперь переходим к лицу.",
+        "«И наконец — лицо. Попробуй заметить и отпустить напряжение здесь.»",
         reply_markup=get_step_keyboard(8)
     )
 
