@@ -1,7 +1,7 @@
 # handlers/assessments/anxiety_test.py
 
 from aiogram import Router, F
-from aiogram.types import Message, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from aiogram.types import Message, ReplyKeyboardRemove, KeyboardButton, ReplyKeyboardMarkup
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import StateFilter
@@ -43,131 +43,40 @@ ANSWER_SCORES = {
     "⛈ Почти постоянно, мешает сосредоточиться": 3, "😣 Почти каждую ночь мучаюсь от плохого сна": 3, "🪨 Постоянно, это мешает расслабиться": 3, "⛈ Почти постоянно, мешает жить": 3, "💢 Почти всегда, когда тревожно": 3, "🌪 Почти всегда": 3, "🚫 Не могу сосредоточиться совсем": 3, "😱 Паника или ступор": 3, "🔴 Почти всегда": 3, "🌪 Постоянно": 3, "🪨 Почти всегда": 3, "🚫 Почти не уверен(а)": 3, "⛈ Почти всегда": 3
 }
 
-# Инлайн клавиатуры для каждого вопроса
-def get_q1_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🌤 Никогда", callback_data="ans_🌤 Никогда")],
-        [InlineKeyboardButton(text="🌦 Иногда, но быстро проходит", callback_data="ans_🌦 Иногда, но быстро проходит")],
-        [InlineKeyboardButton(text="🌧 Часто, но не мешает жить", callback_data="ans_🌧 Часто, но не мешает жить")],
-        [InlineKeyboardButton(text="⛈ Почти постоянно, мешает сосредоточиться", callback_data="ans_⛈ Почти постоянно, мешает сосредоточиться")]
-    ])
+# Функция для проверки валидности ответа
+def is_valid_answer(text: str) -> bool:
+    """Проверяет, является ли текст валидным ответом из кнопок."""
+    return text in ANSWER_SCORES
 
-def get_q2_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🌙 Легко засыпаю и сплю спокойно", callback_data="ans_🌙 Легко засыпаю и сплю спокойно")],
-        [InlineKeyboardButton(text="😌 Иногда долго засыпаю или просыпаюсь ночью", callback_data="ans_😌 Иногда долго засыпаю или просыпаюсь ночью")],
-        [InlineKeyboardButton(text="😕 Засыпаю с трудом, сон поверхностный", callback_data="ans_😕 Засыпаю с трудом, сон поверхностный")],
-        [InlineKeyboardButton(text="😣 Почти каждую ночь мучаюсь от плохого сна", callback_data="ans_😣 Почти каждую ночь мучаюсь от плохого сна")]
-    ])
-
-def get_q3_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🌿 Никогда", callback_data="ans_🌿 Никогда")],
-        [InlineKeyboardButton(text="🍃 Иногда, но быстро отпускает", callback_data="ans_🍃 Иногда, но быстро отпускает")],
-        [InlineKeyboardButton(text="🌾 Часто, но терпимо", callback_data="ans_🌾 Часто, но терпимо")],
-        [InlineKeyboardButton(text="🪨 Постоянно, это мешает расслабиться", callback_data="ans_🪨 Постоянно, это мешает расслабиться")]
-    ])
-
-def get_q4_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🌞 Редко или никогда", callback_data="ans_🌞 Редко или никогда")],
-        [InlineKeyboardButton(text="🌤 Иногда, но не зацикливаюсь", callback_data="ans_🌤 Иногда, но не зацикливаюсь")],
-        [InlineKeyboardButton(text="🌧 Часто, и они крутятся в голове", callback_data="ans_🌧 Часто, и они крутятся в голове")],
-        [InlineKeyboardButton(text="⛈ Почти постоянно, мешает жить", callback_data="ans_⛈ Почти постоянно, мешает жить")]
-    ])
-
-def get_q5_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="❌ Никогда", callback_data="ans_❌ Никогда")],
-        [InlineKeyboardButton(text="🌬 Иногда, но быстро проходит", callback_data="ans_🌬 Иногда, но быстро проходит")],
-        [InlineKeyboardButton(text="💓 Часто при стрессе", callback_data="ans_💓 Часто при стрессе")],
-        [InlineKeyboardButton(text="💢 Почти всегда, когда тревожно", callback_data="ans_💢 Почти всегда, когда тревожно")]
-    ])
-
-def get_q6_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🍀 Редко", callback_data="ans_🍀 Редко")],
-        [InlineKeyboardButton(text="🌿 Иногда", callback_data="ans_🌿 Иногда")],
-        [InlineKeyboardButton(text="🔥 Часто", callback_data="ans_🔥 Часто")],
-        [InlineKeyboardButton(text="🌪 Почти всегда", callback_data="ans_🌪 Почти всегда")]
-    ])
-
-def get_q7_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🏆 Легко", callback_data="ans_🏆 Легко")],
-        [InlineKeyboardButton(text="🎈 Иногда отвлекаюсь", callback_data="ans_🎈 Иногда отвлекаюсь")],
-        [InlineKeyboardButton(text="🎭 Сильно отвлекаюсь", callback_data="ans_🎭 Сильно отвлекаюсь")],
-        [InlineKeyboardButton(text="🚫 Не могу сосредоточиться совсем", callback_data="ans_🚫 Не могу сосредоточиться совсем")]
-    ])
-
-def get_q8_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🧘 Спокойно, ищу решение", callback_data="ans_🧘 Спокойно, ищу решение")],
-        [InlineKeyboardButton(text="🙂 Немного переживаю, но быстро действую", callback_data="ans_🙂 Немного переживаю, но быстро действую")],
-        [InlineKeyboardButton(text="😰 Сильно переживаю, сложно начать действовать", callback_data="ans_😰 Сильно переживаю, сложно начать действовать")],
-        [InlineKeyboardButton(text="😱 Паника или ступор", callback_data="ans_😱 Паника или ступор")]
-    ])
-
-def get_q9_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🟢 Редко", callback_data="ans_🟢 Редко")],
-        [InlineKeyboardButton(text="🟡 Иногда", callback_data="ans_🟡 Иногда")],
-        [InlineKeyboardButton(text="🟠 Часто", callback_data="ans_🟠 Часто")],
-        [InlineKeyboardButton(text="🔴 Почти всегда", callback_data="ans_🔴 Почти всегда")]
-    ])
-
-def get_q10_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🟢 Редко или никогда", callback_data="ans_🟢 Редко или никогда")],
-        [InlineKeyboardButton(text="🟡 Иногда", callback_data="ans_🟡 Иногда")],
-        [InlineKeyboardButton(text="🟠 Часто", callback_data="ans_🟠 Часто")],
-        [InlineKeyboardButton(text="🔴 Почти всегда", callback_data="ans_🔴 Почти всегда")]
-    ])
-
-def get_q11_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🌞 Никогда", callback_data="ans_🌞 Никогда")],
-        [InlineKeyboardButton(text="🌤 Иногда", callback_data="ans_🌤 Иногда")],
-        [InlineKeyboardButton(text="🌦 Часто", callback_data="ans_🌦 Часто")],
-        [InlineKeyboardButton(text="🌪 Постоянно", callback_data="ans_🌪 Постоянно")]
-    ])
-
-def get_q12_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🥇 Полностью уверен(а)", callback_data="ans_🥇 Полностью уверен(а)")],
-        [InlineKeyboardButton(text="🥈 В основном уверен(а)", callback_data="ans_🥈 В основном уверен(а)")],
-        [InlineKeyboardButton(text="🥉 Не всегда уверен(а)", callback_data="ans_🥉 Не всегда уверен(а)")],
-        [InlineKeyboardButton(text="🚫 Почти не уверен(а)", callback_data="ans_🚫 Почти не уверен(а)")]
-    ])
-
-def get_q13_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="❌ Никогда", callback_data="ans_❌ Никогда")],
-        [InlineKeyboardButton(text="🌤 Иногда", callback_data="ans_🌤 Иногда")],
-        [InlineKeyboardButton(text="🌧 Часто", callback_data="ans_🌧 Часто")],
-        [InlineKeyboardButton(text="⛈ Почти всегда", callback_data="ans_⛈ Почти всегда")]
-    ])
-
-def get_q14_keyboard() -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="🟢 Редко или никогда", callback_data="ans_🟢 Редко или никогда")],
-        [InlineKeyboardButton(text="🟡 Иногда", callback_data="ans_🟡 Иногда")],
-        [InlineKeyboardButton(text="🟠 Часто", callback_data="ans_🟠 Часто")],
-        [InlineKeyboardButton(text="🔴 Почти всегда", callback_data="ans_🔴 Почти всегда")]
-    ])
+# Клавиатуры для каждого вопроса
+q1_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=t)] for t in ["🌤 Никогда", "🌦 Иногда, но быстро проходит", "🌧 Часто, но не мешает жить", "⛈ Почти постоянно, мешает сосредоточиться"]], resize_keyboard=True)
+q2_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=t)] for t in ["🌙 Легко засыпаю и сплю спокойно", "😌 Иногда долго засыпаю или просыпаюсь ночью", "😕 Засыпаю с трудом, сон поверхностный", "😣 Почти каждую ночь мучаюсь от плохого сна"]], resize_keyboard=True)
+q3_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=t)] for t in ["🌿 Никогда", "🍃 Иногда, но быстро отпускает", "🌾 Часто, но терпимо", "🪨 Постоянно, это мешает расслабиться"]], resize_keyboard=True)
+q4_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=t)] for t in ["🌞 Редко или никогда", "🌤 Иногда, но не зацикливаюсь", "🌧 Часто, и они крутятся в голове", "⛈ Почти постоянно, мешает жить"]], resize_keyboard=True)
+q5_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=t)] for t in ["❌ Никогда", "🌬 Иногда, но быстро проходит", "💓 Часто при стрессе", "💢 Почти всегда, когда тревожно"]], resize_keyboard=True)
+q6_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=t)] for t in ["🍀 Редко", "🌿 Иногда", "🔥 Часто", "🌪 Почти всегда"]], resize_keyboard=True)
+q7_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=t)] for t in ["🏆 Легко", "🎈 Иногда отвлекаюсь", "🎭 Сильно отвлекаюсь", "🚫 Не могу сосредоточиться совсем"]], resize_keyboard=True)
+q8_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=t)] for t in ["🧘 Спокойно, ищу решение", "🙂 Немного переживаю, но быстро действую", "😰 Сильно переживаю, сложно начать действовать", "😱 Паника или ступор"]], resize_keyboard=True)
+q9_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=t)] for t in ["🟢 Редко", "🟡 Иногда", "🟠 Часто", "🔴 Почти всегда"]], resize_keyboard=True)
+q10_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=t)] for t in ["🟢 Редко или никогда", "🟡 Иногда", "🟠 Часто", "🔴 Почти всегда"]], resize_keyboard=True)
+q11_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=t)] for t in ["🌞 Никогда", "🌤 Иногда", "🌦 Часто", "🌪 Постоянно"]], resize_keyboard=True)
+q12_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=t)] for t in ["🥇 Полностью уверен(а)", "🥈 В основном уверен(а)", "🥉 Не всегда уверен(а)", "🚫 Почти не уверен(а)"]], resize_keyboard=True)
+q13_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=t)] for t in ["❌ Никогда", "🌤 Иногда", "🌧 Часто", "⛈ Почти всегда"]], resize_keyboard=True)
+q14_kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=t)] for t in ["🟢 Редко или никогда", "🟡 Иногда", "🟠 Часто", "🔴 Почти всегда"]], resize_keyboard=True)
 
 # Функция для обработки ответов
-async def process_answer(callback: CallbackQuery, state: FSMContext, next_state, question_text: str, next_kb_func):
+async def process_answer(message: Message, state: FSMContext, next_state, question_text: str, next_kb, current_kb):
     """Обрабатывает ответ пользователя и переходит к следующему вопросу."""
-    answer_text = callback.data.replace("ans_", "")
-    score = ANSWER_SCORES.get(answer_text, 0)
+    if not is_valid_answer(message.text):
+        await message.answer("Пожалуйста, выбери один из предложенных вариантов.", reply_markup=current_kb)
+        return
     
     data = await state.get_data()
-    total_score = data.get('score', 0) + score
-    await state.update_data(score=total_score)
+    score = data.get('score', 0) + ANSWER_SCORES.get(message.text, 0)
+    await state.update_data(score=score)
     
-    await callback.answer()
-    await callback.message.edit_text(question_text, reply_markup=next_kb_func())
+    await state.set_state(next_state)
+    await message.answer(question_text, reply_markup=next_kb)
 
 # Точка входа для начального теста
 async def start_anxiety_test(message: Message, state: FSMContext):
@@ -178,135 +87,121 @@ async def start_anxiety_test(message: Message, state: FSMContext):
         "Это поможет нам понять, как лучше всего поддержать тебя в процессе работы с тревожностью.\n\n"
         "Отвечай честно, опираясь на свои ощущения за последние 7 дней.\n\n"
         "Готов(а) начать? 💙",
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text="Вперед! 💙", callback_data="start_test")],
-            [InlineKeyboardButton(text="Пока не хочу", callback_data="abort_test")]
-        ])
+        reply_markup=ReplyKeyboardMarkup(keyboard=[
+            [KeyboardButton(text="Вперед! 💙")],
+            [KeyboardButton(text="Пока не хочу")]
+        ], resize_keyboard=True)
     )
 
 # Обработчики для начального теста
-@router.callback_query(F.data == "abort_test")
-async def abort_assessment(callback: CallbackQuery, state: FSMContext):
+@router.message(
+    StateFilter(AnxietyTest.intro),
+    F.text == "Пока не хочу"
+)
+async def abort_assessment(message: Message, state: FSMContext):
     await state.clear()
-    await callback.answer()
-    await callback.message.edit_text("Хорошо, можешь пройти пульс тревожности в любое время.")
-    await show_main_menu(callback.message, callback.from_user.id)
+    await message.answer("Хорошо, можешь пройти пульс тревожности в любое время.", reply_markup=ReplyKeyboardRemove())
+    await show_main_menu(message, message.from_user.id)
 
-@router.callback_query(F.data == "start_test")
-async def q1_handler(callback: CallbackQuery, state: FSMContext):
+@router.message(
+    StateFilter(AnxietyTest.intro),
+    F.text == "Вперед! 💙"
+)
+async def q1_handler(message: Message, state: FSMContext):
     await state.set_state(AnxietyTest.q1)
     await state.update_data(score=0)
-    await callback.answer()
-    await callback.message.edit_text(
-        "Как часто в последнее время ты ощущаешь волнение или беспокойство без причины? 😟", 
-        reply_markup=get_q1_keyboard()
-    )
+    await message.answer("Как часто в последнее время ты ощущаешь волнение или беспокойство без причины? 😟", reply_markup=q1_kb)
 
 # Обработчики вопросов
-@router.callback_query(F.data.startswith("ans_"), AnxietyTest.q1)
-async def q1_answer(callback: CallbackQuery, state: FSMContext):
-    await process_answer(callback, state, AnxietyTest.q2, "Как ты спишь? 😴", get_q2_keyboard)
+@router.message(AnxietyTest.q1)
+async def q1_handler(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyTest.q2, "Как ты спишь? 😴", q2_kb, q1_kb)
 
-@router.callback_query(F.data.startswith("ans_"), AnxietyTest.q2)
-async def q2_answer(callback: CallbackQuery, state: FSMContext):
-    await process_answer(callback, state, AnxietyTest.q3, "Бывает ли у тебя напряжение в теле (плечи, шея, челюсти) без физической причины? 💆", get_q3_keyboard)
+@router.message(AnxietyTest.q2)
+async def q2_handler(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyTest.q3, "Бывает ли у тебя напряжение в теле (плечи, шея, челюсти) без физической причины? 💆", q3_kb, q2_kb)
 
-@router.callback_query(F.data.startswith("ans_"), AnxietyTest.q3)
-async def q3_answer(callback: CallbackQuery, state: FSMContext):
-    await process_answer(callback, state, AnxietyTest.q4, "Как часто у тебя возникают тревожные мысли о будущем? 🔮", get_q4_keyboard)
+@router.message(AnxietyTest.q3)
+async def q3_handler(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyTest.q4, "Как часто у тебя возникают тревожные мысли о будущем? 🔮", q4_kb, q3_kb)
 
-@router.callback_query(F.data.startswith("ans_"), AnxietyTest.q4)
-async def q4_answer(callback: CallbackQuery, state: FSMContext):
-    await process_answer(callback, state, AnxietyTest.q5, "Замечаешь ли ты учащённое сердцебиение, дрожь или потливость, когда тревожно? ❤️‍🔥", get_q5_keyboard)
+@router.message(AnxietyTest.q4)
+async def q4_handler(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyTest.q5, "Замечаешь ли ты учащённое сердцебиение, дрожь или потливость, когда тревожно? ❤️‍🔥", q5_kb, q4_kb)
 
-@router.callback_query(F.data.startswith("ans_"), AnxietyTest.q5)
-async def q5_answer(callback: CallbackQuery, state: FSMContext):
-    await process_answer(callback, state, AnxietyTest.q6, "Как часто ты испытываешь раздражительность или вспышки гнева без серьёзной причины? 😠", get_q6_keyboard)
+@router.message(AnxietyTest.q5)
+async def q5_handler(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyTest.q6, "Как часто ты испытываешь раздражительность или вспышки гнева без серьёзной причины? 😠", q6_kb, q5_kb)
 
-@router.callback_query(F.data.startswith("ans_"), AnxietyTest.q6)
-async def q6_answer(callback: CallbackQuery, state: FSMContext):
-    await process_answer(callback, state, AnxietyTest.q7, "Можешь ли ты спокойно сосредоточиться на задаче, когда вокруг стресс? 🎯", get_q7_keyboard)
+@router.message(AnxietyTest.q6)
+async def q6_handler(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyTest.q7, "Можешь ли ты спокойно сосредоточиться на задаче, когда вокруг стресс? 🎯", q7_kb, q6_kb)
 
-@router.callback_query(F.data.startswith("ans_"), AnxietyTest.q7)
-async def q7_answer(callback: CallbackQuery, state: FSMContext):
-    await process_answer(callback, state, AnxietyTest.q8, "Как ты реагируешь на неожиданные трудности? 🚧", get_q8_keyboard)
+@router.message(AnxietyTest.q7)
+async def q7_handler(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyTest.q8, "Как ты реагируешь на неожиданные трудности? 🚧", q8_kb, q7_kb)
 
-@router.callback_query(F.data.startswith("ans_"), AnxietyTest.q8)
-async def q8_answer(callback: CallbackQuery, state: FSMContext):
-    await process_answer(callback, state, AnxietyTest.q9, "Часто ли ты избегаешь ситуаций, которые могут вызвать стресс или волнение? 🛑", get_q9_keyboard)
+@router.message(AnxietyTest.q8)
+async def q8_handler(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyTest.q9, "Часто ли ты избегаешь ситуаций, которые могут вызвать стресс или волнение? 🛑", q9_kb, q8_kb)
 
-@router.callback_query(F.data.startswith("ans_"), AnxietyTest.q9)
-async def q9_answer(callback: CallbackQuery, state: FSMContext):
-    await process_answer(callback, state, AnxietyTest.q10, "Чувствуешь ли ты, что тревога мешает тебе отдыхать и наслаждаться жизнью? 🌴", get_q10_keyboard)
+@router.message(AnxietyTest.q9)
+async def q9_handler(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyTest.q10, "Чувствуешь ли ты, что тревога мешает тебе отдыхать и наслаждаться жизнью? 🌴", q10_kb, q9_kb)
 
-@router.callback_query(F.data.startswith("ans_"), AnxietyTest.q10)
-async def q10_answer(callback: CallbackQuery, state: FSMContext):
-    await process_answer(callback, state, AnxietyTest.q11, "Замечаешь ли ты, что тревога влияет на твоё здоровье (головные боли, желудок, усталость)? 💊", get_q11_keyboard)
+@router.message(AnxietyTest.q10)
+async def q10_handler(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyTest.q11, "Замечаешь ли ты, что тревога влияет на твоё здоровье (головные боли, желудок, усталость)? 💊", q11_kb, q10_kb)
 
-@router.callback_query(F.data.startswith("ans_"), AnxietyTest.q11)
-async def q11_answer(callback: CallbackQuery, state: FSMContext):
-    await process_answer(callback, state, AnxietyTest.q12, "Насколько ты уверен(а) в своих силах справляться с трудностями? 💪", get_q12_keyboard)
+@router.message(AnxietyTest.q11)
+async def q11_handler(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyTest.q12, "Насколько ты уверен(а) в своих силах справляться с трудностями? 💪", q12_kb, q11_kb)
 
-@router.callback_query(F.data.startswith("ans_"), AnxietyTest.q12)
-async def q12_answer(callback: CallbackQuery, state: FSMContext):
-    await process_answer(callback, state, AnxietyTest.q13, "Как часто у тебя бывают трудности с дыханием или ощущение, что \"не хватает воздуха\" при тревоге? 🌬", get_q13_keyboard)
+@router.message(AnxietyTest.q12)
+async def q12_handler(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyTest.q13, "Как часто у тебя бывают трудности с дыханием или ощущение, что \"не хватает воздуха\" при тревоге? 🌬", q13_kb, q12_kb)
 
-@router.callback_query(F.data.startswith("ans_"), AnxietyTest.q13)
-async def q13_answer(callback: CallbackQuery, state: FSMContext):
-    await process_answer(callback, state, AnxietyTest.q14, "Как часто тебе нужна поддержка других, чтобы успокоиться? 🤝", get_q14_keyboard)
+@router.message(AnxietyTest.q13)
+async def q13_handler(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyTest.q14, "Как часто тебе нужна поддержка других, чтобы успокоиться? 🤝", q14_kb, q13_kb)
 
-@router.callback_query(F.data.startswith("ans_"), AnxietyTest.q14)
-async def q14_answer(callback: CallbackQuery, state: FSMContext):
-    answer_text = callback.data.replace("ans_", "")
-    score = ANSWER_SCORES.get(answer_text, 0)
-    
-    data = await callback.message.bot.get_chat(callback.message.chat.id)
-    total_score = data.get('score', 0) + score
-    
+@router.message(AnxietyTest.q14)
+async def q14_handler(message: Message, state: FSMContext):
+    await process_answer(message, state, AnxietyTest.q15, "И последний вопрос: если оценить свою тревожность по шкале от 0 до 10, какой балл ты поставишь? 📊\nПросто отправь цифру.", None, q14_kb)
     await state.set_state(AnxietyTest.q15)
-    await callback.answer()
-    await callback.message.edit_text(
-        "И последний вопрос: если оценить свою тревожность по шкале от 0 до 10, какой балл ты поставишь? 📊\nПросто отправь цифру.",
-        reply_markup=None
-    )
 
-# Обработчик последнего вопроса (числовой ответ)
+# Обработчик завершения начального теста
+@router.message(AnxietyTest.q15, F.text.regexp(r'^\d+$'))
+async def assessment_final(message: Message, state: FSMContext):
+    self_assessment = int(message.text)
+    if not (0 <= self_assessment <= 10):
+        await message.answer("Пожалуйста, введи число от 0 до 10.")
+        return
+
+    data = await state.get_data()
+    score = data.get('score', 0)
+    
+    # Получаем информацию о пользователе
+    bookmark = await db.get_user_bookmark(message.from_user.id)
+    course_id = bookmark['current_course_id'] if bookmark and bookmark['current_course_id'] else 1
+    
+    # Сохраняем результат начального теста
+    await db.save_assessment_result(message.from_user.id, course_id, 'initial', score, self_assessment)
+    
+    await state.clear()
+    await message.answer(
+        f"Отлично! Мы определили отправную точку.\n\n"
+        f"Твой результат: {score}/42 баллов\n"
+        f"Самооценка тревожности: {self_assessment}/10\n\n"
+        f"А теперь давай начнём наш первый урок!",
+        reply_markup=ReplyKeyboardRemove()
+    )
+    await show_main_menu(message, message.from_user.id)
+
+# Обработчик для невалидных ответов на последний вопрос
 @router.message(AnxietyTest.q15)
-async def q15_answer(message: Message, state: FSMContext):
-    try:
-        user_score = int(message.text)
-        if 0 <= user_score <= 10:
-            data = await state.get_data()
-            total_score = data.get('score', 0) + user_score
-            
-            # Сохраняем результат теста
-            await db.save_test_result(message.from_user.id, "anxiety_test", total_score)
-            
-            # Определяем уровень тревожности
-            if total_score <= 10:
-                level = "Низкий"
-                description = "Ты хорошо справляешься со стрессом! Курс поможет тебе ещё больше укрепить эти навыки."
-            elif total_score <= 20:
-                level = "Умеренный"
-                description = "У тебя есть некоторые моменты тревожности, но в целом ты управляешь ситуацией. Курс поможет тебе чувствовать себя ещё увереннее."
-            elif total_score <= 30:
-                level = "Высокий"
-                description = "Ты часто испытываешь тревогу, но это не означает, что ты не можешь с этим справиться. Курс даст тебе конкретные инструменты для работы с тревожностью."
-            else:
-                level = "Очень высокий"
-                description = "Ты проходишь сложный период, и это нормально. Курс поможет тебе постепенно научиться справляться с тревогой и вернуть спокойствие."
-            
-            await message.answer(
-                f"📊 Твой результат: {total_score} баллов\n"
-                f"Уровень тревожности: {level}\n\n"
-                f"{description}\n\n"
-                f"Готов(а) начать курс? 🚀"
-            )
-            
-            await state.clear()
-            await show_main_menu(message, message.from_user.id)
-            
-        else:
-            await message.answer("Пожалуйста, введи число от 0 до 10.")
-    except ValueError:
-        await message.answer("Пожалуйста, введи корректное число от 0 до 10.")
+async def invalid_q15_answer(message: Message):
+    await message.answer(
+        "❌ Пожалуйста, введите только цифру от 0 до 10 для оценки вашей тревожности.\n\n"
+        "Например: 5"
+    )
