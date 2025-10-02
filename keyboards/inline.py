@@ -40,8 +40,8 @@ def get_days_keyboard(current_day: int, progress: set) -> InlineKeyboardMarkup:
             status_icon = "📍" # Текущий
         elif day in completed_days:
             status_icon = "✅" # Пройден
-        elif day <= last_completed_day + 1:
-            status_icon = "▶️" # Следующий доступный, но не текущий
+        elif day <= max(last_completed_day + 1, current_day):
+            status_icon = "▶️" # Доступный (до текущего дня включительно или до последнего пройденного + 1)
         else:
             status_icon = "🔒" # Недоступен
             callback_data = "day_locked"
@@ -57,6 +57,18 @@ def get_modules_keyboard(selected_day: int, bookmark, progress: set) -> InlineKe
     """Создает клавиатуру с 3 модулями для выбранного дня."""
     buttons = []
     current_day, current_module = bookmark['current_day'], bookmark['current_module']
+    
+    # Определяем, какие дни полностью пройдены (все 3 модуля)
+    completed_days = set()
+    day_counts = {}
+    for day, module in progress:
+        day_counts[day] = day_counts.get(day, 0) + 1
+    for day, count in day_counts.items():
+        if count == 3:
+            completed_days.add(day)
+    
+    # Самый высокий полностью пройденный день
+    last_completed_day = max(completed_days) if completed_days else 0
 
     for module in range(1, 4):
         status_icon = ""
@@ -66,10 +78,17 @@ def get_modules_keyboard(selected_day: int, bookmark, progress: set) -> InlineKe
         is_current = (selected_day == current_day and module == current_module)
         
         # Определяем доступность модуля
-        # Модуль доступен, если он пройден, или если он текущий, или если предыдущий модуль пройден
+        # Модуль доступен, если:
+        # 1. Он пройден
+        # 2. Он текущий
+        # 3. Предыдущий модуль в этом дне пройден
+        # 4. Выбранный день доступен (до текущего дня включительно или до последнего пройденного + 1)
+        is_day_accessible = selected_day <= max(last_completed_day + 1, current_day)
         is_unlocked = False
-        if module == 1 or (selected_day, module - 1) in progress:
-             is_unlocked = True
+        
+        if is_day_accessible:
+            if module == 1 or (selected_day, module - 1) in progress:
+                is_unlocked = True
 
         if is_current:
             status_icon = "📍"
