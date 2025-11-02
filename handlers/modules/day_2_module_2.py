@@ -14,6 +14,10 @@ class Day2Module2States(StatesGroup):
     step_2 = State()  # Эзоп играет с детьми
     step_3 = State()  # Лук и отдых
     step_4 = State()  # Расслабление возвращает силы
+    step_5 = State()  # Напоминание про лук - практика
+    step_6 = State()  # Видео практики - кулаки
+    step_7 = State()  # Плечи
+    step_8 = State()  # Лицо
 
 def get_step_keyboard(step: int) -> ReplyKeyboardMarkup:
     """Возвращает клавиатуру для конкретного шага."""
@@ -42,6 +46,34 @@ def get_step_keyboard(step: int) -> ReplyKeyboardMarkup:
         4: ReplyKeyboardMarkup(
             keyboard=[
                 [KeyboardButton(text="🌿 Расслабление возвращает силы")],
+                [KeyboardButton(text="🏠 В основное меню")]
+            ],
+            resize_keyboard=True
+        ),
+        5: ReplyKeyboardMarkup(
+            keyboard=[
+                [KeyboardButton(text="✅ Давай займемся")],
+                [KeyboardButton(text="🏠 В основное меню")]
+            ],
+            resize_keyboard=True
+        ),
+        6: ReplyKeyboardMarkup(
+            keyboard=[
+                [KeyboardButton(text="✊ Кулаки расслаблены")],
+                [KeyboardButton(text="🏠 В основное меню")]
+            ],
+            resize_keyboard=True
+        ),
+        7: ReplyKeyboardMarkup(
+            keyboard=[
+                [KeyboardButton(text="🎒 Напряжение сброшено")],
+                [KeyboardButton(text="🏠 В основное меню")]
+            ],
+            resize_keyboard=True
+        ),
+        8: ReplyKeyboardMarkup(
+            keyboard=[
+                [KeyboardButton(text="🙂 Лицо расслаблено")],
                 [KeyboardButton(text="🏠 В основное меню")]
             ],
             resize_keyboard=True
@@ -139,15 +171,75 @@ async def step_3_to_4(message: Message, state: FSMContext):
             reply_markup=get_step_keyboard(4)
         )
 
-# Шаг 4 -> Завершение модуля
+# Шаг 4 -> Шаг 5
 @router.message(Day2Module2States.step_4, F.text == "🌿 Расслабление возвращает силы")
+async def step_4_to_5(message: Message, state: FSMContext):
+    """Переход от шага 4 к шагу 5."""
+    await state.set_state(Day2Module2States.step_5)
+    
+    await message.answer(
+        "🌬️ Помнишь, что говорил Эзоп про лук?\n\n"
+        "Если держать тетиву всё время натянутой — она теряет силу. Так же и мы: когда тело постоянно в напряжении, тревога только растёт.\n\n"
+        "Поэтому сейчас мы сделаем то, о чём говорил мудрец — натянем и отпустим.",
+        reply_markup=get_step_keyboard(5)
+    )
+
+# Шаг 5 -> Шаг 6 (Видео практики)
+@router.message(Day2Module2States.step_5, F.text == "✅ Давай займемся")
+async def step_5_to_6(message: Message, state: FSMContext):
+    """Переход от шага 5 к шагу 6 - видео практики."""
+    await state.set_state(Day2Module2States.step_6)
+    
+    # Отправляем видео с практикой
+    assets_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "practices")
+    video_path = os.path.join(assets_path, "practice_2.mp4")
+    
+    if os.path.exists(video_path):
+        video_file = FSInputFile(video_path)
+        await message.answer_video(
+            video=video_file,
+            caption="Вспомним утреннюю практику «Прогрессивная мышечная релаксация»:\n\n"
+                    "поочерёдно напрягаем и расслабляем разные части тела — ✊ кулаки, 💪 плечи, 🙂 лицо.",
+            reply_markup=get_step_keyboard(6)
+        )
+    else:
+        await message.answer(
+            "Вспомним утреннюю практику «Прогрессивная мышечная релаксация»:\n\n"
+            "поочерёдно напрягаем и расслабляем разные части тела — ✊ кулаки, 💪 плечи, 🙂 лицо.",
+            reply_markup=get_step_keyboard(6)
+        )
+
+# Шаг 6 -> Шаг 7 (Плечи)
+@router.message(Day2Module2States.step_6, F.text == "✊ Кулаки расслаблены")
+async def step_6_to_7(message: Message, state: FSMContext):
+    """Переход от шага 6 к шагу 7."""
+    await state.set_state(Day2Module2States.step_7)
+    
+    await message.answer(
+        "Следующая остановка — плечи. Здесь тревога любит прятаться.",
+        reply_markup=get_step_keyboard(7)
+    )
+
+# Шаг 7 -> Шаг 8 (Лицо)
+@router.message(Day2Module2States.step_7, F.text == "🎒 Напряжение сброшено")
+async def step_7_to_8(message: Message, state: FSMContext):
+    """Переход от шага 7 к шагу 8."""
+    await state.set_state(Day2Module2States.step_8)
+    
+    await message.answer(
+        "И наконец — лицо. Попробуй заметить и отпустить напряжение здесь.",
+        reply_markup=get_step_keyboard(8)
+    )
+
+# Шаг 8 -> Завершение модуля
+@router.message(Day2Module2States.step_8, F.text == "🙂 Лицо расслаблено")
 async def complete_day_2_module_2(message: Message, state: FSMContext):
     """Завершает второй модуль второго дня."""
     import database as db
     
     await message.answer(
-        "💫 Отличная притча, правда?\n\n"
-        "Помни: отдых — это не слабость, а необходимость. Даже самый сильный лук нуждается в передышке.\n\n"
+        "Это простой способ ощутить ту самую разницу между усилием и покоем, о которой говорил Эзоп.\n\n"
+        "💫 Отличная работа! Помни: отдых — это не слабость, а необходимость.\n\n"
         "📌 До встречи в следующем модуле!"
     )
     
@@ -168,6 +260,10 @@ async def complete_day_2_module_2(message: Message, state: FSMContext):
 @router.message(Day2Module2States.step_2, F.text == "🏠 В основное меню")
 @router.message(Day2Module2States.step_3, F.text == "🏠 В основное меню")
 @router.message(Day2Module2States.step_4, F.text == "🏠 В основное меню")
+@router.message(Day2Module2States.step_5, F.text == "🏠 В основное меню")
+@router.message(Day2Module2States.step_6, F.text == "🏠 В основное меню")
+@router.message(Day2Module2States.step_7, F.text == "🏠 В основное меню")
+@router.message(Day2Module2States.step_8, F.text == "🏠 В основное меню")
 async def back_to_main_menu_from_module(message: Message, state: FSMContext):
     """Возвращает в главное меню."""
     from handlers.course_flow import show_main_menu
