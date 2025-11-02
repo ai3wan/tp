@@ -507,8 +507,11 @@ async def complete_day_1_module_1(message: Message, state: FSMContext):
         parse_mode="HTML"
     )
     
-    # Обновляем закладку пользователя на следующий модуль
+    # ИСПРАВЛЕНИЕ: Сохраняем прогресс перед обновлением закладки
     user_id = message.from_user.id
+    await db.complete_module(user_id, course_id=1, day=1, module=1)
+    
+    # Обновляем закладку пользователя на следующий модуль
     await db.update_user_bookmark(user_id, course_id=1, day=1, module=2)
     
     # Показываем главное меню с обновленным прогрессом

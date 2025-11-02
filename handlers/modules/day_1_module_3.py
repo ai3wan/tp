@@ -280,8 +280,11 @@ async def complete_day_1_module_3(message: Message, state: FSMContext):
     """Завершает третий модуль первого дня."""
     import database as db
     
-    # Обновляем закладку пользователя на следующий день
+    # ИСПРАВЛЕНИЕ: Сохраняем прогресс перед обновлением закладки
     user_id = message.from_user.id
+    await db.complete_module(user_id, course_id=1, day=1, module=3)
+    
+    # Обновляем закладку пользователя на следующий день
     await db.update_user_bookmark(user_id, course_id=1, day=2, module=1)
     
     # Показываем главное меню с обновленным прогрессом
