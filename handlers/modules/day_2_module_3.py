@@ -184,9 +184,9 @@ async def step_6_to_7(message: Message, state: FSMContext):
     """Переход от шага 6 к шагу 7 - медитация."""
     await state.set_state(Day2Module3States.step_7)
     
-    # Отправляем аудио с медитацией
-    assets_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "meditations")
-    audio_path = os.path.join(assets_path, "meditation_1.mp3")
+    # Отправляем картинку с текстом
+    assets_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "d2m3")
+    image_path = os.path.join(assets_path, "d2m3_2.jpg")
     
     text = (
         "🌙 День подходит к концу. Самое время позволить телу отпустить всё лишнее.\n\n"
@@ -194,14 +194,22 @@ async def step_6_to_7(message: Message, state: FSMContext):
         "Устройся удобно, закрой глаза и позволь теплу разлиться по всему телу 😌"
     )
     
-    if os.path.exists(audio_path):
-        audio_file = FSInputFile(audio_path)
-        await message.answer_audio(
-            audio=audio_file,
+    if os.path.exists(image_path):
+        image_file = FSInputFile(image_path)
+        await message.answer_photo(
+            photo=image_file,
             caption=text
         )
     else:
         await message.answer(text=text)
+    
+    # Отправляем аудио с медитацией
+    audio_assets_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "assets", "meditations")
+    audio_path = os.path.join(audio_assets_path, "meditation_1.mp3")
+    
+    if os.path.exists(audio_path):
+        audio_file = FSInputFile(audio_path)
+        await message.answer_audio(audio=audio_file)
     
     # Завершаем модуль автоматически после отправки медитации
     import database as db
