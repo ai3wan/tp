@@ -21,15 +21,3 @@ class ResetProgress(StatesGroup):
     Состояние для подтверждения сброса прогресса.
     """
     confirming_reset = State()
-
-class Day2Module2States(StatesGroup):
-    """
-    Состояния для второго дня, второго модуля.
-    Притча Эзопа о луке и практика расслабления.
-    """
-    step_1 = State()  # Введение в притчу
-    step_2 = State()  # Начало притчи - Эзоп играет с детьми
-    step_3 = State()  # Эзоп берет лук
-    step_4 = State()  # Мораль притчи
-    step_5 = State()  # Переход к практике
-    step_6 = State()  # Мышечная релаксация
